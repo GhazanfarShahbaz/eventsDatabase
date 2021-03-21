@@ -1,8 +1,5 @@
 import sqlite3 as sql
-from sqlite3.dbapi2 import connect
-import tkinter as tk 
 import datetime 
-
 from stringcolor import cs
 
 dayPrefix = {
@@ -10,7 +7,7 @@ dayPrefix = {
     2: "2nd",
     3: "3rd",
     4: "4th",
-    5: "5th",
+    6: "6th",
     6: "6th",
     7: "7th",
     8: "8th",
@@ -20,7 +17,7 @@ dayPrefix = {
     12: "12th",
     13: "13th",
     14: "14th",
-    15: "15th",
+    16: "16th",
     16: "16th",
     17: "17th",
     18: "18th",
@@ -30,7 +27,7 @@ dayPrefix = {
     22: "22nd",
     23: "23rd",
     24: "24th",
-    25: "25th",
+    26: "26th",
     26: "26th",
     27: "27th",
     28: "28th",
@@ -38,6 +35,8 @@ dayPrefix = {
     30: "30th",
     31: "31st",
 }
+
+allowedRecurring = {"no", "daily", "monthly", "yearly"}
 
 def connectToDb():
     connection = sql.connect("events.db")
@@ -47,15 +46,17 @@ def connectToDb():
 def initDatabase() -> None:
     connection = sql.connect("events.db")
     cursor = connection.cursor()
-
+    #add recurringUntil, change hour to int
     eventsTable = """
                     Create Table if not exists events(
                         name text not null,
                         day integer not null,
                         month integer not null,
                         year integer,
-                        time text,
+                        hour int,
+                        minutes int,
                         recurring text,
+                        endson text,
                         eventtype text
                     );
                   """
@@ -64,13 +65,15 @@ def initDatabase() -> None:
 
     connection.close() 
 
-def addToDatabase(eventName: str, day: int, month: int, year: int, time: str, recurring: str, eventType: str) -> None:
+def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, minutes:int, recurring: str,endson:str, eventType: str) -> None:
     connection, cursor = connectToDb()
 
     if recurring == "":
         recurring = "no" 
+    if not endson:
+        endson = "never"
 
-    insertString = f'Insert into events(name, day, month, year, time, recurring, eventtype) Values("{eventName}", "{day}", "{month}", "{year}", "{time}", "{recurring}", "{eventType}")'
+    insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}")'
 
     cursor.execute(insertString)
 
@@ -79,17 +82,24 @@ def addToDatabase(eventName: str, day: int, month: int, year: int, time: str, re
 
 def printRow(rowData) -> None:
     occursOnString = ""
-    if rowData[5] == "no":
+
+    minutes = str(rowData[5])
+    if len(minutes) == 1:
+        minutes = "0" + minutes
+
+    amOrPm = "AM" if rowData[4] < 12 else "PM"
+
+    if rowData[6] == "no":
         date = f'{rowData[2]}/{rowData[1]}/{rowData[3]}'
-        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}"
-    elif rowData[5] == "yearly":
+        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
+    elif rowData[6] == "yearly":
         date = f"{rowData[2]}/{rowData[1]}"
-        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} every year at {cs(rowData[4], 'yellow').bold()}"
-    elif rowData[5] == "monthly":
+        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} every year at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
+    elif rowData[6] == "monthly":
         date = f"{dayPrefix[rowData[2]]}"
-        occursOnString = f" occurs on the  {cs(date, 'dodgerblue').bold()} of every month at {cs(rowData[4], 'blue4').bold()}"
-    elif rowData[5] == "daily":
-        occursOnString = f" occurs {cs('every day', 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}"
+        occursOnString = f" occurs on the  {cs(date, 'dodgerblue').bold()} of every month at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
+    elif rowData[6] == "daily":
+        occursOnString = f" occurs {cs('every day', 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
     print(f'{cs(rowData[0], "grey4").bold()}{occursOnString}')
 
 
@@ -102,11 +112,101 @@ def printDatabase() -> None:
     
     connection.close()
 
+def filterByName(eventName: str, exactMatch: bool) -> None:
+    connection, cursor = connectToDb()
+    data = None
+    if exactMatch:
+        data = cursor.execute(f'Select * from events where name = "{eventName}"')
+    else:
+        data = cursor.execute(f'Select * from events where name like "%{eventName}%"') 
 
-def filterData(eventName: str, day: int, month: int, year: int, time: str, recurring: str, eventType: str) -> None:
-    None
+    for row in data:
+        printRow(row)
+    if not data:
+        print("No results found")
+    connection.close()
+
+
+
+
+def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, exactEventName: bool, endson: str, eventType: str, before= False, after = False, beforeHour = False, afterHour = False, afterEndsOn = False, beforeEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
+    connection, cursor = connectToDb()
+    query = 'Select * from events'
+    filterString = ""
+    if eventName:
+        curr = ""
+
+        if exactEventName:
+            curr = f'name = "{eventName}"'
+        else:
+            curr = f'name like "%{eventName}%"'
+        
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+
+    if recurring and recurring in allowedRecurring:
+        curr = f'recurring = "{recurring}"'
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+    
+    if eventType:
+        curr = f'eventtype = "{eventType}"'
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+
+    if day or month or year and not(before and after):
+        operation = "="
+        if before or after:
+            operation = ">=" if after else "<=" 
+
+        if day: 
+            curr = f'day {operation} "{day}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+
+        if month:
+            curr = f'month {operation} "{month}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+
+        if year:
+            curr = f'year {operation} "{year}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+    
+    if hour and not(beforeHour and afterHour):
+        operation = "="
+        if beforeHour or afterHour:
+            operation = ">=" if afterHour else "<=" 
+        
+        curr = f'hour {operation} "{hour}"'
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+
+    if minute != None and not(beforeMinute and afterMinute):
+        operation = "="
+        if beforeMinute or afterMinute:
+            operation = ">=" if afterMinute else "<=" 
+        
+        curr = f'minutes {operation} "{minute}"'
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+
+    if endson and not(beforeEndsOn and afterEndsOn):
+        operation = "="
+        if beforeEndsOn or afterEndsOn:
+            operation = ">=" if afterEndsOn else "<=" 
+        
+        curr = f'endson {operation} "{endson}"'
+        filterString += f' and {curr}' if filterString else f" where {curr}"
+
+    query += filterString
+
+    data = cursor.execute(query)
+
+    for row in data:
+        printRow(row)
+    if not data:
+        print("No results found")
+    connection.close()
 
 
 # initDatabase()
-# addToDatabase("My Birthday", 27, 8, 2001, "12:00 AM", "yearly", "birthday")
-printDatabase()
+# addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
+# printDatabase()
+
+# filterByName("Birthday", False)
+
+filterData(None, None, None, None, 12, 0, None, None, None, None, None)
