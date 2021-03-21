@@ -1,5 +1,5 @@
 import sqlite3 as sql
-import datetime 
+from datetime import datetime
 from stringcolor import cs
 
 dayPrefix = {
@@ -57,7 +57,8 @@ def initDatabase() -> None:
                         minutes int,
                         recurring text,
                         endson text,
-                        eventtype text
+                        eventtype text,
+                        dateadded text
                     );
                   """
 
@@ -67,13 +68,25 @@ def initDatabase() -> None:
 
 def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, minutes:int, recurring: str,endson:str, eventType: str) -> None:
     connection, cursor = connectToDb()
+    date = datetime.now()
 
-    if recurring == "":
+    if not(day and month and year and eventName):
+        print("Missing vital information, not added")
+        return
+    if not hour:
+        hour = 12 
+    if not minutes:
+        minutes = 0
+    if eventType == "":
+        eventType = "none"
+    if recurring not in allowedRecurring :
         recurring = "no" 
     if not endson:
         endson = "never"
 
-    insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}")'
+    
+
+    insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype, dateadded) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}", "{date.month}/{date.day}/{date.year}")'
 
     cursor.execute(insertString)
 
@@ -224,5 +237,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         print("No results found")
     connection.close()
 
+initDatabase()
+# addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
 # filterData(None, None, None, None, 12, 0, None, None, None, None, None)
-databaseToCsv()
+# databaseToCsv()
