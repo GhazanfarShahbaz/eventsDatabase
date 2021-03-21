@@ -106,11 +106,35 @@ def printRow(rowData) -> None:
 def printDatabase() -> None:
     connection, cursor = connectToDb()
     data = cursor.execute("Select * from Events")
-    
     for row in data:
         printRow(row)
     
     connection.close()
+
+def databaseToCsv() -> None:
+    connection, cursor = connectToDb()
+    data = cursor.execute("Select * from Events")
+    
+
+    currentFile = open("events.csv", "w")
+
+    columnString = ""
+    for t in data.description:
+        columnString += t[0] + ", "
+
+    columnString = columnString[:len(columnString)-2]
+    currentFile.write(columnString + "\n")
+
+    for eventRow in data:
+        eventString = eventRow[0]
+        for columns in eventRow[1:]:
+            eventString += f", {columns}"
+
+        currentFile.write(eventString + "\n")
+
+    currentFile.close()
+    connection.close()
+
 
 def filterByName(eventName: str, exactMatch: bool) -> None:
     connection, cursor = connectToDb()
@@ -125,8 +149,6 @@ def filterByName(eventName: str, exactMatch: bool) -> None:
     if not data:
         print("No results found")
     connection.close()
-
-
 
 
 def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, afterEndsOn = False, beforeEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
@@ -202,11 +224,5 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         print("No results found")
     connection.close()
 
-
-# initDatabase()
-# addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
-# printDatabase()
-
-# filterByName("Birthday", False)
-
-filterData(None, None, None, None, 12, 0, None, None, None, None, None)
+# filterData(None, None, None, None, 12, 0, None, None, None, None, None)
+databaseToCsv()

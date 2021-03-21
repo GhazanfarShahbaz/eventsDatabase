@@ -1,0 +1,2 @@
+name, day, month, year, hour, minutes, recurring, endson, eventtype
+My Birthday, 27, 8, 2001, 12, 0, yearly, never, birthday
