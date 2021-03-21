@@ -129,7 +129,7 @@ def filterByName(eventName: str, exactMatch: bool) -> None:
 
 
 
-def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, exactEventName: bool, endson: str, eventType: str, before= False, after = False, beforeHour = False, afterHour = False, afterEndsOn = False, beforeEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
+def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, afterEndsOn = False, beforeEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
     connection, cursor = connectToDb()
     query = 'Select * from events'
     filterString = ""
