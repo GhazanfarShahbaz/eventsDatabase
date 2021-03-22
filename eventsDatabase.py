@@ -46,7 +46,7 @@ def connectToDb():
 def initDatabase() -> None:
     connection = sql.connect("events.db")
     cursor = connection.cursor()
-    #add recurringUntil, change hour to int
+    # add recurringUntil, change hour to int
     eventsTable = """
                     Create Table if not exists events(
                         name text not null,
@@ -79,6 +79,7 @@ def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, mi
         minutes = 0
     if eventType == "":
         eventType = "none"
+    recurring = recurring.lower()
     if recurring not in allowedRecurring :
         recurring = "no" 
     if not endson:
@@ -100,7 +101,7 @@ def printRow(rowData) -> None:
     if len(minutes) == 1:
         minutes = "0" + minutes
 
-    amOrPm = "AM" if rowData[4] < 12 else "PM"
+    amOrPm = "AM" if rowData[4] <= 12 else "PM"
 
     if rowData[6] == "no":
         date = f'{rowData[2]}/{rowData[1]}/{rowData[3]}'
@@ -238,6 +239,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
     connection.close()
 
 initDatabase()
+printDatabase()
 # addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
 # filterData(None, None, None, None, 12, 0, None, None, None, None, None)
 # databaseToCsv()
