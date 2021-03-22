@@ -13,7 +13,7 @@ def addToDatabaseLabels() -> None:
         minutes = minutes_input.get()
         recurring = recurring_input.get()
         endson = endson_input.get()
-        event_type = endson_input.get()
+        event_type = event_type_input.get()
         addToDatabase(event_name, day, month, year, hour, minutes, recurring, endson, event_type)
 
     event_name_text = tk.Label(root, text = "Event Name:")
@@ -77,6 +77,39 @@ def addToDatabaseLabels() -> None:
     button_one.config(fg="white")
     window.create_window(193, 300, window=button_one)
 def filterDataLabels() -> None:
+    def filterDataGate():
+        event_name = event_name_2_input.get()
+        day = day_2_input.get()
+        year = year_2_input.get()
+        month = month_2_input.get()
+        if month:
+            month = int(month)
+        hour = hour_2_input.get()
+
+        if hour:
+            hour = int(hour)
+
+        minutes = minutes_2_input.get()
+        if minutes == "":
+            minutes = -1
+        else:
+            minutes = int(minutes)
+        
+        recurring = recurring_2_input.get()
+        endson = ends_on_2_input.get()
+        event_type = event_type_2_input.get()
+        event_name_exact =  checkbox_exact_event_name.get()
+        before = checkbox__before.get()
+        after = checkbox__after.get()
+        before_hour = checkbox_hour_before.get()
+        after_hour =  checkbox_hour_after.get()
+        before_minute = checkbox_minute_before.get()
+        after_minute = checkbox_minute_after.get() 
+        before_ends_on = checkbox_endson_before.get()
+        after_ends_on = checkbox_endson_after.get()
+
+        filterData(event_name, day, month, year, hour, minutes, recurring, endson, event_name_exact, event_type, before, after, before_hour, after_hour, before_ends_on, after_ends_on, before_minute, after_minute)
+
     event_name_2_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 350, window=event_name_2_text)
 
@@ -175,6 +208,10 @@ def filterDataLabels() -> None:
     checkbox_exact_event_name =  tk.IntVar(root)
     checkbox_exact_event_name_button = tk.Checkbutton(root, text="Hour After", variable=checkbox_exact_event_name)
     window.create_window(170, 675, window=checkbox_exact_event_name_button) 
+
+    button_two = tk.Button(root, text='Filter Data', command=filterDataGate)
+    button_two.config(fg="white")
+    window.create_window(193, 700, window=button_two)
 
 
 root=tk.Tk()

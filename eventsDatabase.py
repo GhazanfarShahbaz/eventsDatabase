@@ -165,7 +165,7 @@ def filterByName(eventName: str, exactMatch: bool) -> None:
     connection.close()
 
 
-def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, afterEndsOn = False, beforeEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
+def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, beforeEndsOn = False,afterEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
     connection, cursor = connectToDb()
     query = 'Select * from events'
     filterString = ""
@@ -212,7 +212,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         curr = f'hour {operation} "{hour}"'
         filterString += f' and {curr}' if filterString else f" where {curr}"
 
-    if minute != None and not(beforeMinute and afterMinute):
+    if minute!= -1 and minute -1 >= 0 and not(beforeMinute and afterMinute):
         operation = "="
         if beforeMinute or afterMinute:
             operation = ">=" if afterMinute else "<=" 
@@ -231,7 +231,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
     query += filterString
 
     data = cursor.execute(query)
-
+    print(query)
     for row in data:
         printRow(row)
     if not data:
@@ -239,7 +239,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
     connection.close()
 
 initDatabase()
-printDatabase()
+# printDatabase()
 # addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
 # filterData(None, None, None, None, 12, 0, None, None, None, None, None)
 # databaseToCsv()
