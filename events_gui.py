@@ -2,7 +2,6 @@ import tkinter as tk
 import PySimpleGUI as sg
 from eventsDatabase import addToDatabase, filterData
 
-# def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, minutes:int, recurring: str,endson:str, eventType: str) -> None:
 def addToDatabaseLabels() -> None:
     def addToDatabaseGate() -> None:
         event_name = event_name_input.get()
@@ -219,10 +218,8 @@ root=tk.Tk()
 window = tk.Canvas(root, width=350, height=1000)
 window.pack()
 
-
 addToDatabaseLabels()
 filterDataLabels()
-
 
 exitButton = tk.Button(root, text="Quit", command=root.quit)  # Close Button
 window.create_window(200, 750, window=exitButton)

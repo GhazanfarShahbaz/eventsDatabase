@@ -36,12 +36,16 @@ dayPrefix = {
     31: "31st",
 }
 
-allowedRecurring = {"no", "daily", "monthly", "yearly"}
+allowedRecurring = {
+    "no",
+    "daily", 
+    "monthly", 
+    "yearly"
+    }
 
 def connectToDb():
     connection = sql.connect("events.db")
     return connection, connection.cursor()
-
 
 def initDatabase() -> None:
     connection = sql.connect("events.db")
@@ -94,7 +98,7 @@ def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, mi
     connection.commit()
     connection.close()
 
-def printRow(rowData) -> None:
+def printRow(rowData: tuple) -> None:
     occursOnString = ""
 
     minutes = str(rowData[5])
@@ -115,7 +119,6 @@ def printRow(rowData) -> None:
     elif rowData[6] == "daily":
         occursOnString = f" occurs {cs('every day', 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
     print(f'{cs(rowData[0], "grey4").bold()}{occursOnString}')
-
 
 def printDatabase() -> None:
     connection, cursor = connectToDb()
@@ -149,7 +152,6 @@ def databaseToCsv() -> None:
     currentFile.close()
     connection.close()
 
-
 def filterByName(eventName: str, exactMatch: bool) -> None:
     connection, cursor = connectToDb()
     data = None
@@ -164,8 +166,8 @@ def filterByName(eventName: str, exactMatch: bool) -> None:
         print("No results found")
     connection.close()
 
-
-def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, beforeEndsOn = False,afterEndsOn = False, beforeMinute = False, afterMinute = False) -> None:
+def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, beforeEndsOn = False,afterEndsOn = False, beforeMinute = False, afterMinute = False, stopFilter = "") -> None:
+    """Add date filter"""
     connection, cursor = connectToDb()
     query = 'Select * from events'
     filterString = ""
@@ -228,6 +230,18 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         curr = f'endson {operation} "{endson}"'
         filterString += f' and {curr}' if filterString else f" where {curr}"
 
+    if stopFilter:
+        stopFilter = stopFilter.split("/")
+        if stopFilter[0].strip():
+            curr = f'month < "{stopFilter[0]}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+        if stopFilter[1].strip():
+            curr = f'day < "{stopFilter[1]}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+        if stopFilter[2].strip():
+            curr = f'year < "{stopFilter[2]}"'
+            filterString += f' and {curr}' if filterString else f" where {curr}"
+
     query += filterString
 
     data = cursor.execute(query)
@@ -237,9 +251,3 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
     if not data:
         print("No results found")
     connection.close()
-
-initDatabase()
-# printDatabase()
-# addToDatabase("My Birthday", 27, 8, 2001, 12,0, "yearly", "", "birthday")
-# filterData(None, None, None, None, 12, 0, None, None, None, None, None)
-# databaseToCsv()
