@@ -76,6 +76,7 @@ def addToDatabaseLabels() -> None:
     button_one = tk.Button(root, text='Add to Database', command=addToDatabaseGate)
     button_one.config(fg="white")
     window.create_window(193, 300, window=button_one)
+
 def filterDataLabels() -> None:
     def filterDataGate():
         event_name = event_name_2_input.get()
@@ -212,7 +213,6 @@ def filterDataLabels() -> None:
     button_two = tk.Button(root, text='Filter Data', command=filterDataGate)
     button_two.config(fg="white")
     window.create_window(193, 700, window=button_two)
-
 
 root=tk.Tk()
 
