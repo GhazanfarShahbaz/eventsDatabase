@@ -50,7 +50,6 @@ def connectToDb():
 def initDatabase() -> None:
     connection = sql.connect("events.db")
     cursor = connection.cursor()
-    # add recurringUntil, change hour to int
     eventsTable = """
                     Create Table if not exists events(
                         name text not null,
@@ -73,6 +72,7 @@ def initDatabase() -> None:
 def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, minutes:int, recurring: str,endson:str, eventType: str) -> None:
     connection, cursor = connectToDb()
     date = datetime.now()
+    eventName = eventName.lower()
 
     if not(day and month and year and eventName):
         print("Missing vital information, not added")
@@ -89,13 +89,19 @@ def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, mi
     if not endson:
         endson = "never"
 
-    
+    checkString = f'Select * from events where name = "{eventName}" and day = "{day}" and month = "{month}" and year = "{year}" and hour = "{hour}" and minutes = "{minutes}" and recurring = "{recurring}" and endson = "{endson}" and eventtype = "{eventType}"'
+    data = cursor.execute(checkString)
+    count = 0
+    for k in data:
+        count += 1
+    if not count:
+        insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype, dateadded) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}", "{date.month}/{date.day}/{date.year}")'
 
-    insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype, dateadded) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}", "{date.month}/{date.day}/{date.year}")'
+        cursor.execute(insertString)
+        connection.commit()
+    else:
+        print("Entry already exists")
 
-    cursor.execute(insertString)
-
-    connection.commit()
     connection.close()
 
 def printRow(rowData: tuple) -> None:
@@ -118,19 +124,23 @@ def printRow(rowData: tuple) -> None:
         occursOnString = f" occurs on the  {cs(date, 'dodgerblue').bold()} of every month at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
     elif rowData[6] == "daily":
         occursOnString = f" occurs {cs('every day', 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
-    print(f'{cs(rowData[0], "grey4").bold()}{occursOnString}')
+    print(f'{cs(rowData[0][0].upper() + rowData[0][1:], "grey4").bold()}{occursOnString}')
 
 def printDatabase() -> None:
     connection, cursor = connectToDb()
-    data = cursor.execute("Select * from Events")
+    data = cursor.execute("Select * from events")
+
     for row in data:
         printRow(row)
-    
+
+    if not data:
+        print("No data")
+
     connection.close()
 
 def databaseToCsv() -> None:
     connection, cursor = connectToDb()
-    data = cursor.execute("Select * from Events")
+    data = cursor.execute("Select * from events")
     
 
     currentFile = open("events.csv", "w")
@@ -171,7 +181,9 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
     connection, cursor = connectToDb()
     query = 'Select * from events'
     filterString = ""
+    additionalFilter = ""
     if eventName:
+        eventName = eventName.lower()
         curr = ""
 
         if exactEventName:
@@ -181,7 +193,8 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         
         filterString += f' and {curr}' if filterString else f" where {curr}"
 
-    if recurring and recurring in allowedRecurring:
+    if recurring and recurring.lower() in allowedRecurring:
+        recurring = recurring.lower()
         curr = f'recurring = "{recurring}"'
         filterString += f' and {curr}' if filterString else f" where {curr}"
     
@@ -197,7 +210,7 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
         if day: 
             curr = f'day {operation} "{day}"'
             filterString += f' and {curr}' if filterString else f" where {curr}"
-
+            
         if month:
             curr = f'month {operation} "{month}"'
             filterString += f' and {curr}' if filterString else f" where {curr}"
@@ -242,12 +255,15 @@ def filterData(eventName: str, day: int, month: int, year: int, hour: int, minut
             curr = f'year < "{stopFilter[2]}"'
             filterString += f' and {curr}' if filterString else f" where {curr}"
 
-    query += filterString
+    query += f"{filterString}"
 
     data = cursor.execute(query)
-    print(query)
+    # print(query)
     for row in data:
         printRow(row)
     if not data:
         print("No results found")
     connection.close()
+
+
+initDatabase()

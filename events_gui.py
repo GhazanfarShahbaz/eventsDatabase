@@ -1,18 +1,18 @@
 import tkinter as tk
 import PySimpleGUI as sg
-from eventsDatabase import addToDatabase, filterData
+from eventsDatabase import addToDatabase, filterData, printDatabase
 
 def addToDatabaseLabels() -> None:
     def addToDatabaseGate() -> None:
-        event_name = event_name_input.get()
-        day = day_input.get()
-        year = year_input.get()
-        month = month_input.get()
-        hour = hour_input.get()
-        minutes = minutes_input.get()
-        recurring = recurring_input.get()
-        endson = endson_input.get()
-        event_type = event_type_input.get()
+        event_name = event_name_input.get().strip()
+        day = day_input.get().strip()
+        year = year_input.get().strip()
+        month = month_input.get().strip()
+        hour = hour_input.get().strip()
+        minutes = minutes_input.get().strip()
+        recurring = recurring_input.get().strip()
+        endson = endson_input.get().strip()
+        event_type = event_type_input.get().strip()
         addToDatabase(event_name, day, month, year, hour, minutes, recurring, endson, event_type)
 
     event_name_text = tk.Label(root, text = "Event Name:")
@@ -78,26 +78,26 @@ def addToDatabaseLabels() -> None:
 
 def filterDataLabels() -> None:
     def filterDataGate():
-        event_name = event_name_2_input.get()
-        day = day_2_input.get()
-        year = year_2_input.get()
-        month = month_2_input.get()
+        event_name = event_name_2_input.get().strip()
+        day = day_2_input.get().strip()
+        year = year_2_input.get().strip()
+        month = month_2_input.get().strip()
         if month:
             month = int(month)
-        hour = hour_2_input.get()
+        hour = hour_2_input.get().strip()
 
         if hour:
             hour = int(hour)
 
-        minutes = minutes_2_input.get()
+        minutes = minutes_2_input.get().strip()
         if minutes == "":
             minutes = -1
         else:
             minutes = int(minutes)
         
-        recurring = recurring_2_input.get()
-        endson = ends_on_2_input.get()
-        event_type = event_type_2_input.get()
+        recurring = recurring_2_input.get().strip()
+        endson = ends_on_2_input.get().strip()
+        event_type = event_type_2_input.get().strip()
         event_name_exact =  checkbox_exact_event_name.get()
         before = checkbox__before.get()
         after = checkbox__after.get()
@@ -221,7 +221,11 @@ window.pack()
 addToDatabaseLabels()
 filterDataLabels()
 
+button_three = tk.Button(root, text='Print Database', command=printDatabase)
+button_three.config(fg="white")
+window.create_window(193, 725, window=button_three)
+
 exitButton = tk.Button(root, text="Quit", command=root.quit)  # Close Button
-window.create_window(200, 750, window=exitButton)
+window.create_window(200, 800, window=exitButton)
 
 root.mainloop()
