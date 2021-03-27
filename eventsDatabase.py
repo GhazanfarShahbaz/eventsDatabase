@@ -1,269 +1,247 @@
-import sqlite3 as sql
+from os import times
+import sqlite3 as sql 
 from datetime import datetime
-from stringcolor import cs
+from stringcolor import cs 
 
-dayPrefix = {
-    1: "1st",
-    2: "2nd",
-    3: "3rd",
-    4: "4th",
-    6: "6th",
-    6: "6th",
-    7: "7th",
-    8: "8th",
-    9: "9th",
-    10: "10th",
-    11: "11th",
-    12: "12th",
-    13: "13th",
-    14: "14th",
-    16: "16th",
-    16: "16th",
-    17: "17th",
-    18: "18th",
-    19: "19th",
-    20: "20th",
-    21: "21st",
-    22: "22nd",
-    23: "23rd",
-    24: "24th",
-    26: "26th",
-    26: "26th",
-    27: "27th",
-    28: "28th",
-    29: "29th",
-    30: "30th",
-    31: "31st",
-}
 
-allowedRecurring = {
-    "no",
-    "daily", 
-    "monthly", 
-    "yearly"
-    }
+def connectToDb() -> tuple:
+    connection = sql.connect("events.db")       # sql.Connection
+    cursor = connection.cursor()                # sql.Cursor
+    return connection, cursor   
 
-def connectToDb():
-    connection = sql.connect("events.db")
-    return connection, connection.cursor()
 
-def initDatabase() -> None:
-    connection = sql.connect("events.db")
-    cursor = connection.cursor()
-    eventsTable = """
-                    Create Table if not exists events(
-                        name text not null,
-                        day integer not null,
-                        month integer not null,
-                        year integer,
-                        hour int,
-                        minutes int,
-                        recurring text,
-                        endson text,
-                        eventtype text,
-                        dateadded text
-                    );
-                  """
-
-    cursor.execute(eventsTable)
-
-    connection.close() 
-
-def addToDatabase(eventName: str, day: int, month: int, year: int, hour: int, minutes:int, recurring: str,endson:str, eventType: str) -> None:
+def createTable() -> None:
     connection, cursor = connectToDb()
-    date = datetime.now()
-    eventName = eventName.lower()
 
-    if not(day and month and year and eventName):
-        print("Missing vital information, not added")
-        return
-    if not hour:
-        hour = 12 
-    if not minutes:
-        minutes = 0
-    if eventType == "":
-        eventType = "none"
-    recurring = recurring.lower()
-    if recurring not in allowedRecurring :
-        recurring = "no" 
-    if not endson:
-        endson = "never"
+    cursor.execute( """
+                        Create table if not exists Events(
+                            id integer primary key, 
+                            event_name text not null,
+                            begin_date text not null,
+                            time integer,
+                            recurs text, 
+                            last_recurrance text,
+                            date_added text, 
+                            type_of_event text,
+                            description text
+                        );
+                    """)
 
-    checkString = f'Select * from events where name = "{eventName}" and day = "{day}" and month = "{month}" and year = "{year}" and hour = "{hour}" and minutes = "{minutes}" and recurring = "{recurring}" and endson = "{endson}" and eventtype = "{eventType}"'
-    data = cursor.execute(checkString)
-    count = 0
-    for k in data:
-        count += 1
-    if not count:
-        insertString = f'Insert into events(name, day, month, year, hour, minutes, recurring, endson, eventtype, dateadded) Values("{eventName}", "{day}", "{month}", "{year}", "{hour}","{minutes}", "{recurring}","{endson}", "{eventType}", "{date.month}/{date.day}/{date.year}")'
+    connection.commit()
+    connection.close()
 
-        cursor.execute(insertString)
-        connection.commit()
-    else:
-        print("Entry already exists")
+
+def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
+    if not(eventName and startDate) or (last_recurrance and not recurs):
+        return False 
+
+    connection, cursor = connectToDb()
+    data = cursor.execute("Select Count(id) from events")
+    count = data.fetchone()[0]
+
+    data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time if not None else null}" and begin_date = "{startDate if not None else null}" and recurs = "{recurs if not None else null}" and description = "{description if not None else null}"')
+
+    exists = data.fetchone()
+
+    todaysDate = datetime.now()
+    dateAdded = f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}" 
+
+    if exists:
+        return False
+
+    #For loop to add recurring events
+    cursor.execute(f'''
+                        Insert into events(id, event_name, begin_date, time, recurs, last_recurrance, date_added, type_of_event, description) 
+                        VALUES(
+                            "{count}",
+                            "{eventName}", 
+                            "{startDate}", 
+                            "{time if not None else null}", 
+                            "{recurs if not None else null}", 
+                            "{last_recurrance if not None else null}", 
+                            "{dateAdded}", 
+                            "{type_of_event if not None else null}", 
+                            "{description if not None else null}"
+                            )
+                    ''')
+
+    connection.commit()
+    return True
+
+
+def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0 ) -> None:
+    connection, cursor = connectToDb()
+
+    query = "Select * from events "
+    filterQuery = ""
+    backedQuery = ""
+
+    if eventName:
+        currentQuery = ""
+        eventName = eventName.lower()
+
+        if not filterQuery:
+            currentQuery = f'where event_name = "{eventName}"'
+
+        else:
+            currentQuery = f' and event_name = "{eventName}"'
+        
+        filterQuery += currentQuery 
+
+    if not begin_date and end_date_filter: 
+        begin_date, end_date_filter = end_date_filter, begin_date
+
+    start_date_operation = "="
+    end_date_operation = "="
+
+    if begin_date and end_date_filter:
+        date_format = '%m/%d/%Y'
+        try:
+            datetime.strptime(begin_date, date_format)
+            datetime.strptime(end_date_filter, date_format)
+        except ValueError:
+            return 
+        
+        if begin_date <= end_date_filter:
+            start_date_operation = ">="
+            end_date_operation = "<="
+        else:
+            begin_date, end_date_filter = end_date_filter, begin_date
+            # start_date_operation = "<="
+            # end_date_operation = ">="
+    if begin_date:
+        currentQuery = ""
+
+        if not filterQuery:
+            currentQuery = f'where begin_date {start_date_operation} "{begin_date}"'
+
+        else:
+            currentQuery = f' and begin_date {start_date_operation} "{begin_date}"'
+        
+        filterQuery += currentQuery 
+        
+    if end_date_filter:
+        currentQuery = ""
+
+        if not filterQuery:
+            currentQuery = f'where begin_date {end_date_operation} "{end_date_filter}"'
+
+        else:
+            currentQuery = f' and begin_date {end_date_operation} "{end_date_filter}"'
+        
+        filterQuery += currentQuery 
+    
+    if not time and end_time_filter:
+        time, end_time_filter = end_time_filter, time
+
+    start_time_operation = "="
+    end_time_operation = "="
+
+    if time and end_time_filter:
+        if time <= end_time_filter:
+            start_time_operation = ">="
+            end_time_operation = "<="
+        else:
+            start_time_operation = "<="
+            end_time_operation = ">="
+    #Combine statement above
+    if time:
+        currentQuery = ""
+
+        if not filterQuery:
+            currentQuery = f'where time {start_time_operation} "{time}"'
+
+        else:
+            currentQuery = f' and time {start_time_operation} "{time}"'
+        
+        filterQuery += currentQuery 
+        backedQuery += f'time {start_time_operation} "{time}"' if not backedQuery else  f' and time {start_time_operation} "{time}"'
+        
+    if end_time_filter:
+        currentQuery = ""
+
+        if not filterQuery:
+            currentQuery = f'where time {end_time_operation} "{end_time_filter}"'
+
+        else:
+            currentQuery = f' and time {end_time_operation} "{end_time_filter}"'
+        
+        filterQuery += currentQuery 
+        backedQuery += f'time {end_time_operation} "{end_time_filter}"' if not backedQuery else  f' and time {end_time_operation} "{end_time_filter}"'
+    
+    if recurs:
+        recurs = recurs.lower()
+        currentQuery = f'recurs = "{recurs}"' if recurs != "none" else f'recurs is "{null}"'
+        backedQuery = currentQuery if not backedQuery else f" and {currentQuery}"
+    
+        if not filterQuery:
+            currentQuery = "where " + currentQuery
+        else: 
+            currentQuery = " and" + currentQuery
+
+        currentQuery += filterQuery
+
+    if not recurs:
+        currentQuery = ""
+
+        if begin_date and end_date_filter:
+            currentQuery = f"or (last_recurrance >= {begin_date} and last_recurrance <= {end_date_filter} and {filterQuery[5:]})"
+        elif begin_date:
+            currentQuery = f"or (begin_date <= {begin_date} and last_recurrance >= {begin_date} and {backedQuery}"
+            None
+        
+        filterQuery = f"{filterQuery} {currentQuery}"
+        
+    query += filterQuery
+    data = cursor.execute(query)
+
+    for row in data:
+        printRow(data)
+    
 
     connection.close()
 
-def printRow(rowData: tuple) -> None:
-    occursOnString = ""
 
-    minutes = str(rowData[5])
-    if len(minutes) == 1:
-        minutes = "0" + minutes
 
-    amOrPm = "AM" if rowData[4] <= 12 else "PM"
-
-    if rowData[6] == "no":
-        date = f'{rowData[2]}/{rowData[1]}/{rowData[3]}'
-        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
-    elif rowData[6] == "yearly":
-        date = f"{rowData[2]}/{rowData[1]}"
-        occursOnString = f" occurs on {cs(date, 'dodgerblue').bold()} every year at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
-    elif rowData[6] == "monthly":
-        date = f"{dayPrefix[rowData[2]]}"
-        occursOnString = f" occurs on the  {cs(date, 'dodgerblue').bold()} of every month at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
-    elif rowData[6] == "daily":
-        occursOnString = f" occurs {cs('every day', 'dodgerblue').bold()} at {cs(rowData[4], 'blue4').bold()}:{cs(minutes, 'blue4').bold()} {cs(amOrPm, 'blue4').bold()}"
-    print(f'{cs(rowData[0][0].upper() + rowData[0][1:], "grey4").bold()}{occursOnString}')
 
 def printDatabase() -> None:
     connection, cursor = connectToDb()
+
     data = cursor.execute("Select * from events")
+    isEmpty = False if data.fetchone() else True
 
-    for row in data:
-        printRow(row)
-
-    if not data:
-        print("No data")
-
-    connection.close()
-
-def databaseToCsv() -> None:
-    connection, cursor = connectToDb()
-    data = cursor.execute("Select * from events")
-    
-
-    currentFile = open("events.csv", "w")
-
-    columnString = ""
-    for t in data.description:
-        columnString += t[0] + ", "
-
-    columnString = columnString[:len(columnString)-2]
-    currentFile.write(columnString + "\n")
-
-    for eventRow in data:
-        eventString = eventRow[0]
-        for columns in eventRow[1:]:
-            eventString += f", {columns}"
-
-        currentFile.write(eventString + "\n")
-
-    currentFile.close()
-    connection.close()
-
-def filterByName(eventName: str, exactMatch: bool) -> None:
-    connection, cursor = connectToDb()
-    data = None
-    if exactMatch:
-        data = cursor.execute(f'Select * from events where name = "{eventName}"')
+    if isEmpty:
+        print("Database is empty :(")
     else:
-        data = cursor.execute(f'Select * from events where name like "%{eventName}%"') 
+        for row in data:
+            None 
 
-    for row in data:
-        printRow(row)
-    if not data:
-        print("No results found")
-    connection.close()
 
-def filterData(eventName: str, day: int, month: int, year: int, hour: int, minute:int, recurring: str, endson: str, eventType: str, exactEventName=False,  before= False, after = False, beforeHour = False, afterHour = False, beforeEndsOn = False,afterEndsOn = False, beforeMinute = False, afterMinute = False, stopFilter = "") -> None:
-    """Add date filter"""
-    connection, cursor = connectToDb()
-    query = 'Select * from events'
-    filterString = ""
-    additionalFilter = ""
-    if eventName:
-        eventName = eventName.lower()
-        curr = ""
-
-        if exactEventName:
-            curr = f'name = "{eventName}"'
-        else:
-            curr = f'name like "%{eventName}%"'
-        
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    if recurring and recurring.lower() in allowedRecurring:
-        recurring = recurring.lower()
-        curr = f'recurring = "{recurring}"'
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-    
-    if eventType:
-        curr = f'eventtype = "{eventType}"'
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    if day or month or year and not(before and after):
-        operation = "="
-        if before or after:
-            operation = ">=" if after else "<=" 
-
-        if day: 
-            curr = f'day {operation} "{day}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-            
-        if month:
-            curr = f'month {operation} "{month}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-
-        if year:
-            curr = f'year {operation} "{year}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-    
-    if hour and not(beforeHour and afterHour):
-        operation = "="
-        if beforeHour or afterHour:
-            operation = ">=" if afterHour else "<=" 
-        
-        curr = f'hour {operation} "{hour}"'
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    if minute!= -1 and minute -1 >= 0 and not(beforeMinute and afterMinute):
-        operation = "="
-        if beforeMinute or afterMinute:
-            operation = ">=" if afterMinute else "<=" 
-        
-        curr = f'minutes {operation} "{minute}"'
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    if endson and not(beforeEndsOn and afterEndsOn):
-        operation = "="
-        if beforeEndsOn or afterEndsOn:
-            operation = ">=" if afterEndsOn else "<=" 
-        
-        curr = f'endson {operation} "{endson}"'
-        filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    if stopFilter:
-        stopFilter = stopFilter.split("/")
-        if stopFilter[0].strip():
-            curr = f'month < "{stopFilter[0]}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-        if stopFilter[1].strip():
-            curr = f'day < "{stopFilter[1]}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-        if stopFilter[2].strip():
-            curr = f'year < "{stopFilter[2]}"'
-            filterString += f' and {curr}' if filterString else f" where {curr}"
-
-    query += f"{filterString}"
-
-    data = cursor.execute(query)
-    # print(query)
-    for row in data:
-        printRow(row)
-    if not data:
-        print("No results found")
     connection.close()
 
 
-initDatabase()
+def printRow(row) -> None:
+    timeString = ""
+    if row[3]:
+        timeRow = str(row[3])
+        hour = 0 
+        minute = 0
+
+        for char in timeRow[:2]:
+            hour = hour*10 + char 
+        
+        for char in timeRow[2:]:
+            minute = minute*10 + char 
+
+        # if hour > 12:
+
+    if not row[4]:
+        rowString = f"{row[1]} occurs on {row[2]}"
+    # rowString = f"{row[1]} occurs {since if row[4] else on}"
+    
+
+
+
+createTable()
+addToTable("test", "03/20/20")
+
