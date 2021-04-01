@@ -70,21 +70,21 @@ def filterDataLabels() -> None:
             minutes = -1
         else:
             minutes = int(minutes)
-        
-        type_of_event = type_of_event_2_input.get().strip()
-        desription = ends_on_2_input.get().strip()
-        event_type = event_type_2_input.get().strip()
-        event_name_exact =  checkbox_exact_event_name.get()
-        before = checkbox__before.get()
-        after = checkbox__after.get()
-        before_last_reccurance = checkbox_last_reccurance_before.get()
-        after_last_reccurance =  checkbox_last_reccurance_after.get()
-        before_minute = checkbox_minute_before.get()
-        after_minute = checkbox_minute_after.get() 
-        before_ends_on = checkbox_desription_before.get()
-        after_ends_on = checkbox_desription_after.get()
+        None
+        # type_of_event = type_of_event_2_input.get().strip()
+        # desription = description_2_input.get().strip()
+        # event_type = end_date_filter_input.get().strip()
+        # event_name_exact =  checkbox_before_last_occurence.get()
+        # before = checkbox__before.get()
+        # after = checkbox__after.get()
+        # before_last_reccurance = checkbox_last_reccurance_before.get()
+        # after_last_reccurance =  checkbox_last_reccurance_after.get()
+        # before_minute = checkbox_minute_before.get()
+        # after_minute = checkbox_minute_after.get() 
+        # before_description = checkbox_desription_before.get()
+        # after_description = checkbox_desription_after.get()
 
-        filterDatabase(event_name, begin_date, time, recurs, last_reccurance, minutes, type_of_event, desription, event_name_exact, event_type, before, after, before_last_reccurance, after_last_reccurance, before_ends_on, after_ends_on, before_minute, after_minute)
+        # filterDatabase(event_name, begin_date, time, recurs, last_reccurance, minutes, type_of_event, desription, event_name_exact, event_type, before, after, before_last_reccurance, after_last_reccurance, before_description, after_description, before_minute, after_minute)
 
     event_name_2_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 350, window=event_name_2_text)
@@ -92,98 +92,64 @@ def filterDataLabels() -> None:
     event_name_2_input = tk.Entry(root)
     window.create_window(200,350, window=event_name_2_input) 
 
-    begin_date_2_text = tk.Label(root, text = "begin_date:")
-    window.create_window(82, 375, window=begin_date_2_text)
+    begin_date_2_text = tk.Label(root, text = "Begin Date:")
+    window.create_window(60, 375, window=begin_date_2_text)
 
     begin_date_2_input = tk.Entry(root)
     window.create_window(200,375, window=begin_date_2_input) 
 
-    time_2_text = tk.Label(root, text = "time:")
-    window.create_window(74, 400, window=time_2_text)
+    time_2_text = tk.Label(root, text = "Time:")
+    window.create_window(79, 400, window=time_2_text)
 
     time_2_input = tk.Entry(root)
     window.create_window(200,400, window=time_2_input) 
 
-    recurs_2_text = tk.Label(root, text = "recurs:")
-    window.create_window(80, 425, window=recurs_2_text)
+    recurs_2_text = tk.Label(root, text = "Recurs:")
+    window.create_window(73, 425, window=recurs_2_text)
 
     recurs_2_input = tk.Entry(root)
     window.create_window(200,425, window=recurs_2_input) 
 
-    last_reccurance_2_text = tk.Label(root, text = "last_reccurance:")
-    window.create_window(80, 450, window=last_reccurance_2_text)
+    last_reccurance_2_text = tk.Label(root, text = "Last Recurrance:")
+    window.create_window(45, 450, window=last_reccurance_2_text)
 
     last_reccurance_2_input = tk.Entry(root)
     window.create_window(200,450, window=last_reccurance_2_input) 
 
-    minutes_2_text = tk.Label(root, text = "Minutes:")
-    window.create_window(71, 475, window=minutes_2_text)
-
-    minutes_2_input = tk.Entry(root)
-    window.create_window(200,475, window=minutes_2_input) 
-
-    type_of_event_2_text = tk.Label(root, text = "type_of_event:")
-    window.create_window(65, 500, window=type_of_event_2_text)
+    type_of_event_2_text = tk.Label(root, text = "Event Type:")
+    window.create_window(60, 475, window=type_of_event_2_text)
 
     type_of_event_2_input = tk.Entry(root)
-    window.create_window(200,500, window=type_of_event_2_input) 
+    window.create_window(200, 475, window=type_of_event_2_input) 
 
-    ends_on_2_text = tk.Label(root, text = "Ends On:")
-    window.create_window(70, 525, window=ends_on_2_text)
+    date_added = tk.Label(root, text = "Date Added:")
+    window.create_window(59, 500, window=date_added)
 
-    ends_on_2_input = tk.Entry(root)
-    window.create_window(200,525, window=ends_on_2_input) 
+    minutes_2_input = tk.Entry(root)
+    window.create_window(200,500, window=minutes_2_input) 
 
-    event_type_2_text = tk.Label(root, text = "Event Type:")
-    window.create_window(61, 550, window=event_type_2_text)
+    description_2_text = tk.Label(root, text = "Description:")
+    window.create_window(60, 525, window=description_2_text)
 
-    event_type_2_input = tk.Entry(root)
-    window.create_window(200,550, window=event_type_2_input) 
+    description_2_input = tk.Entry(root)
+    window.create_window(200,525, window=description_2_input) 
 
+    end_date_filter_text = tk.Label(root, text = "End Date:")
+    window.create_window(66, 550, window=end_date_filter_text)
 
-    checkbox__before = tk.IntVar(root)
-    checkBox__before_button = tk.Checkbutton(root, text=" Before", variable=checkbox__before)
-    window.create_window(100, 575, window=checkBox__before_button) 
-
-
-    checkbox__after = tk.IntVar(root)
-    checkBox__after_button = tk.Checkbutton(root, text=" After", variable=checkbox__after)
-    window.create_window(225, 575, window=checkBox__after_button) 
+    end_date_filter_input = tk.Entry(root)
+    window.create_window(200,550, window=end_date_filter_input) 
 
 
-    checkbox_desription_before = tk.IntVar(root)
-    checkBox_desription_before_button = tk.Checkbutton(root, text="Ends On Before", variable=checkbox_desription_before)
-    window.create_window(125, 600, window=checkBox_desription_before_button) 
+    end_time_filter_text = tk.Label(root, text = "End Time:")
+    window.create_window(66, 575, window=end_time_filter_text)
 
+    end_time_filter_input = tk.Entry(root)
+    window.create_window(200,575, window=end_time_filter_input) 
 
-    checkbox_desription_after = tk.IntVar(root)
-    checkBox_desription_after_button = tk.Checkbutton(root, text="Ends On After", variable=checkbox_desription_after)
-    window.create_window(250, 600, window=checkBox_desription_after_button) 
-
-
-    checkbox_minute_before = tk.IntVar(root)
-    checkBox_minute_before_button = tk.Checkbutton(root, text="Minute Before", variable=checkbox_minute_before)
-    window.create_window(120, 625, window=checkBox_minute_before_button) 
-
-
-    checkbox_minute_after = tk.IntVar(root)
-    checkBox_minute_after_button = tk.Checkbutton(root, text="Minute After", variable=checkbox_minute_after)
-    window.create_window(245, 625, window=checkBox_minute_after_button) 
-
-
-    checkbox_last_reccurance_before = tk.IntVar(root)
-    checkBox_last_reccurance_before_button = tk.Checkbutton(root, text="last_reccurance Before", variable=checkbox_last_reccurance_before)
-    window.create_window(114, 650, window=checkBox_last_reccurance_before_button) 
-
-
-    checkbox_last_reccurance_after = tk.IntVar(root)
-    checkBox_last_reccurance_after_button = tk.Checkbutton(root, text="last_reccurance After", variable=checkbox_last_reccurance_after)
-    window.create_window(239, 650, window=checkBox_last_reccurance_after_button) 
-
-
-    checkbox_exact_event_name =  tk.IntVar(root)
-    checkbox_exact_event_name_button = tk.Checkbutton(root, text="last_reccurance After", variable=checkbox_exact_event_name)
-    window.create_window(170, 675, window=checkbox_exact_event_name_button) 
+    checkbox_before_last_occurence =  tk.IntVar(root)
+    checkbox_before_last_occurence_button = tk.Checkbutton(root, text="Before Last Occurence", variable=checkbox_before_last_occurence)
+    window.create_window(185, 600, window=checkbox_before_last_occurence_button) 
 
     button_two = tk.Button(root, text='Filter Data', command=filterDataGate)
     button_two.config(fg="white")
@@ -195,7 +161,7 @@ window = tk.Canvas(root, width=350, height=1000)
 window.pack()
 
 addToDatabaseLabels()
-# filterDataLabels()
+filterDataLabels()
 
 button_three = tk.Button(root, text='Print Database', command=printDatabase)
 button_three.config(fg="white")

@@ -69,13 +69,14 @@ def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance
     return True
 
 
-def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0 ) -> None:
+def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", eventType = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0 ) -> None:
+    #Add Event Type Filter
     connection, cursor = connectToDb()
 
     query = "Select * from events "
     filterQuery = ""
     backedQuery = ""
-
+    prnt(query)
     if eventName:
         currentQuery = ""
         eventName = eventName.lower()
@@ -107,8 +108,6 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             end_date_operation = "<="
         else:
             begin_date, end_date_filter = end_date_filter, begin_date
-            # start_date_operation = "<="
-            # end_date_operation = ">="
     if begin_date:
         currentQuery = ""
 
@@ -193,10 +192,11 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         filterQuery = f"{filterQuery} {currentQuery}"
         
     query += filterQuery
+    print(query)
     data = cursor.execute(query)
 
     for row in data:
-        printRow(data)
+        printRow(row)
     
 
     connection.close()
@@ -221,6 +221,7 @@ def printDatabase() -> None:
 
 
 def printRow(row) -> None:
+    print(row)
     timeString = ""
     if row[3]:
         timeRow = str(row[3])
