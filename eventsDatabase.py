@@ -3,7 +3,6 @@ import sqlite3 as sql
 from datetime import datetime
 from stringcolor import cs 
 
-
 def connectToDb() -> tuple:
     connection = sql.connect("events.db")       # sql.Connection
     cursor = connection.cursor()                # sql.Cursor
@@ -47,6 +46,7 @@ def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance
     dateAdded = f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}" 
 
     if exists:
+        print("EXISts")
         return False
 
     #For loop to add recurring events
@@ -207,14 +207,14 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
 def printDatabase() -> None:
     connection, cursor = connectToDb()
 
-    data = cursor.execute("Select * from events")
+    data = cursor.execute("Select * from Events limit 1")
     isEmpty = False if data.fetchone() else True
-
     if isEmpty:
         print("Database is empty :(")
     else:
+        data = cursor.execute("Select * from Events")
         for row in data:
-            None 
+            print(row)
 
 
     connection.close()
@@ -242,6 +242,8 @@ def printRow(row) -> None:
 
 
 
-createTable()
-addToTable("test", "03/20/20")
+# createTable()
+# addToTable("test", "03/20/20")
 
+
+createTable()
