@@ -1,3 +1,4 @@
+from datetime import date
 import tkinter as tk
 import PySimpleGUI as sg
 from eventsDatabase import addToTable, filterDatabase, printDatabase
@@ -65,14 +66,19 @@ def filterDataLabels() -> None:
         if last_reccurance:
             last_reccurance = int(last_reccurance)
 
-        minutes = minutes_2_input.get().strip()
-        if minutes == "":
-            minutes = -1
-        else:
-            minutes = int(minutes)
-        None
-        # type_of_event = type_of_event_2_input.get().strip()
-        # desription = description_2_input.get().strip()
+        # # date = date_added_input.get().strip()
+        # if minutes == "":
+        #     minutes = -1
+        # else:
+        #     minutes = int(minutes)
+        # None
+        last_reccurance = last_reccurance_2_input.get().strip()
+        type_of_event = type_of_event_2_input.get().strip()
+        date_added = date_added.get().strip()
+        description = description_2_input.get().strip()
+        end_date = end_date_filter_input.get().strip()
+        end_time = end_time_filter_input.get().strip()
+        # before_date = checkbox_before_last_occurence
         # event_type = end_date_filter_input.get().strip()
         # event_name_exact =  checkbox_before_last_occurence.get()
         # before = checkbox__before.get()
@@ -84,7 +90,7 @@ def filterDataLabels() -> None:
         # before_description = checkbox_desription_before.get()
         # after_description = checkbox_desription_after.get()
 
-        # filterDatabase(event_name, begin_date, time, recurs, last_reccurance, minutes, type_of_event, desription, event_name_exact, event_type, before, after, before_last_reccurance, after_last_reccurance, before_description, after_description, before_minute, after_minute)
+        filterDatabase(event_name, begin_date, time, recurs, last_reccurance, date_added, description, end_date, end_time)
 
     event_name_2_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 350, window=event_name_2_text)
@@ -125,8 +131,8 @@ def filterDataLabels() -> None:
     date_added = tk.Label(root, text = "Date Added:")
     window.create_window(59, 500, window=date_added)
 
-    minutes_2_input = tk.Entry(root)
-    window.create_window(200,500, window=minutes_2_input) 
+    date_added_input = tk.Entry(root)
+    window.create_window(200,500, window=date_added_input) 
 
     description_2_text = tk.Label(root, text = "Description:")
     window.create_window(60, 525, window=description_2_text)
