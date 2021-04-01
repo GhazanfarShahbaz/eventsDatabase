@@ -74,7 +74,7 @@ def filterDataLabels() -> None:
         # None
         last_reccurance = last_reccurance_2_input.get().strip()
         type_of_event = type_of_event_2_input.get().strip()
-        date_added = date_added.get().strip()
+        date_added = date_added_input.get().strip()
         description = description_2_input.get().strip()
         end_date = end_date_filter_input.get().strip()
         end_time = end_time_filter_input.get().strip()
@@ -90,7 +90,7 @@ def filterDataLabels() -> None:
         # before_description = checkbox_desription_before.get()
         # after_description = checkbox_desription_after.get()
 
-        filterDatabase(event_name, begin_date, time, recurs, last_reccurance, date_added, description, end_date, end_time)
+        filterDatabase(event_name, begin_date, time, recurs, last_reccurance, type_of_event, date_added, description, end_date, end_time)
 
     event_name_2_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 350, window=event_name_2_text)
@@ -128,8 +128,8 @@ def filterDataLabels() -> None:
     type_of_event_2_input = tk.Entry(root)
     window.create_window(200, 475, window=type_of_event_2_input) 
 
-    date_added = tk.Label(root, text = "Date Added:")
-    window.create_window(59, 500, window=date_added)
+    date_added_text= tk.Label(root, text = "Date Added:")
+    window.create_window(59, 500, window=date_added_text)
 
     date_added_input = tk.Entry(root)
     window.create_window(200,500, window=date_added_input) 

@@ -73,10 +73,9 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     #Add Event Type Filter
     connection, cursor = connectToDb()
 
-    query = "Select * from events "
+    query = "Select * from Events "
     filterQuery = ""
     backedQuery = ""
-    prnt(query)
     if eventName:
         currentQuery = ""
         eventName = eventName.lower()
@@ -96,12 +95,14 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     end_date_operation = "="
 
     if begin_date and end_date_filter:
-        date_format = '%m/%d/%Y'
-        try:
-            datetime.strptime(begin_date, date_format)
-            datetime.strptime(end_date_filter, date_format)
-        except ValueError:
-            return 
+        # date_format = '%m/%d/%Y'
+        # print(end_date_filter)
+        # try:
+        #     datetime.strptime(begin_date, date_format)
+        #     datetime.strptime(end_date_filter, date_format)
+        # except ValueError:
+        #     print("Invalid Format")
+        #     return 
         
         if begin_date <= end_date_filter:
             start_date_operation = ">="
@@ -182,21 +183,21 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
 
     if not recurs:
         currentQuery = ""
-
+        backedQuery = "" if not backedQuery else "and" + backedQuery
         if begin_date and end_date_filter:
             currentQuery = f"or (last_recurrance >= {begin_date} and last_recurrance <= {end_date_filter} and {filterQuery[5:]})"
         elif begin_date:
-            currentQuery = f"or (begin_date <= {begin_date} and last_recurrance >= {begin_date} and {backedQuery}"
+            currentQuery = f"or (begin_date <= {begin_date} and last_recurrance >= {begin_date} {backedQuery})"
             None
         
-        filterQuery = f"{filterQuery} {currentQuery}"
+        filterQuery = f"where ({filterQuery[5:]}) {currentQuery}"
         
     query += filterQuery
     print(query)
     data = cursor.execute(query)
 
     for row in data:
-        printRow(row)
+        print(row)
     
 
     connection.close()
