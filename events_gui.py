@@ -4,18 +4,14 @@ from eventsDatabase import addToTable, filterDatabase, printDatabase
 
 def addToDatabaseLabels() -> None:
     def addToDatabaseGate() -> None:
-        # event_name = event_name_input.get().strip()
-        # begin_date = begin_date_input.get().strip()
-        # recurs = recurs_input.get().strip()
-        # time = time_input.get().strip()
-        # last_reccurance = last_reccurance_input.get().strip()
-        # minutes = minutes_input.get().strip()
-        # type_of_event = type_of_event_input.get().strip()
-        # desription = desription_input.get().strip()
-        # event_type = type_of_event.get().strip()
-        # description = desription_input.get().strip()
-        # addToTable(event_name, begin_date, time, recurs, last_reccurance, minutes, type_of_event, desription, event_type, description)
-        None
+        event_name = event_name_input.get().strip()
+        begin_date = begin_date_input.get().strip()
+        time = time_input.get().strip()
+        recurs = recurs_input.get().strip()
+        last_reccurance = last_reccurance_input.get().strip()
+        type_of_event = type_of_event_input.get().strip()
+        description = desription_input.get().strip()
+        addToTable(event_name, begin_date, time, recurs, last_reccurance, type_of_event, description)
 
     event_name_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 50, window=event_name_text)  
@@ -42,20 +38,15 @@ def addToDatabaseLabels() -> None:
     last_reccurance_input = tk.Entry(root) 
     window.create_window(200, 150, window=last_reccurance_input)
 
-    date_added = tk.Label(root, text = "Date Added:")
-    window.create_window(61, 175, window=date_added) 
-    minutes_input = tk.Entry(root) 
-    window.create_window(200, 175, window=minutes_input) 
-
     type_of_event_text = tk.Label(root, text = "Type of Event:")
-    window.create_window(55, 200, window=type_of_event_text) 
+    window.create_window(55, 175, window=type_of_event_text) 
     type_of_event_input = tk.Entry(root) 
-    window.create_window(200, 200, window=type_of_event_input)
+    window.create_window(200, 175, window=type_of_event_input)
 
     desription_text = tk.Label(root, text = "Description:")
-    window.create_window(62, 225, window=desription_text)  
+    window.create_window(62, 200, window=desription_text)  
     desription_input = tk.Entry(root) 
-    window.create_window(200, 225, window=desription_input)
+    window.create_window(200, 200, window=desription_input)
 
     button_one = tk.Button(root, text='Add to Database', command=addToDatabaseGate)
     button_one.config(fg="white")
