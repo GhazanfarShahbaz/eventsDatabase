@@ -66,6 +66,7 @@ monthName = {
     12: "December"
 }
 
+allowed_recurs = {"no", "daily", "weekly", "monthly", "yearly"}
 
 def connectToDb() -> tuple:
     connection = sql.connect("events.db")       # sql.Connection
@@ -124,17 +125,17 @@ def extendTime(time: str) -> str:
     return date
 
 
-def addToTable(eventName, startDate, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
+def addToTable(eventName, date, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None, start_recurrance = None) -> bool:
     time = extendTime(time)
     end_time = extendTime(end_time)
-    if not (eventName or startDate) or (last_recurrance and not recurs) or not(validateDate(time) or validateDate(end_time) or validateDate(startDate) or validateDate(last_recurrance)):
+    if not (eventName or date) or (last_recurrance and not recurs) or not(validateDate(time) or validateDate(end_time) or validateDate(date) or validateDate(last_recurrance)):
         return False
 
     connection, cursor = connectToDb()
     data = cursor.execute("Select Count(id) from events")
     count = data.fetchone()[0]
     
-    data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{startDate if startDate else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
+    # data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{date if date else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
 
     exists = data.fetchone()
 
@@ -144,22 +145,64 @@ def addToTable(eventName, startDate, time = None, end_time = None, recurs = None
     if exists:
         print("This entry already exists")
         return False
-    
-    cursor.execute(f'''
-                        Insert into events(id, event_name, begin_date, time, end_time, recurs, last_recurrance, date_added, type_of_event, description) 
+
+    recurs = recurs.lower() if recurs else "no" 
+    if recurs == "no":
+        cursor.execute(f'''
+                            Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
+                            VALUES(
+                                "{count}",
+                                "{eventName}", 
+                                "{date}", 
+                                "{time}", 
+                                "{end_time}", 
+                                "{recurs}", 
+                                "{last_recurrance if last_recurrance else None}", 
+                                "{start_recurrance if start_recurrance else None}", 
+                                "{dateAdded}", 
+                                "{type_of_event if type_of_event else None}", 
+                                "{description if description else None}"
+                                )
+                        ''')
+    else:
+        currentDate = date.split("/")
+        currentMonth, currentDay, currentYear = int(date[0]), int(date[1]), int(date[2])
+        if not last_recurrance:
+            last_recurrance = "12/31/2099"
+        if recurs == "daily":
+            while currentDate < last_recurrance:
+                cursor.execute(f'''
+                        Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
                         VALUES(
                             "{count}",
                             "{eventName}", 
-                            "{startDate}", 
+                            "{currentDate}", 
                             "{time}", 
                             "{end_time}", 
-                            "{recurs if recurs else None}", 
-                            "{last_recurrance if last_recurrance else None}", 
+                            "{recurs}", 
+                            "{last_recurrance}", 
+                            "{date}", 
                             "{dateAdded}", 
                             "{type_of_event if type_of_event else None}", 
                             "{description if description else None}"
                             )
                     ''')
+                if currentDay + 1 <= monthDays[currentMonth]:
+                    currentDay += 1
+                elif currentDay + 1 > monthDays[currentMonth]:
+                    if currentMonth < 12:
+                        currentMonth += 1
+                        currentDay = 1
+                    else:
+                        currentMonth = 1
+                        currentDay = 1
+                        currentYear += 1
+                
+                currentDate = f"{currentMonth}/{currentDay}/{currentYear}"
+
+
+
+
 
     connection.commit()
     return True
