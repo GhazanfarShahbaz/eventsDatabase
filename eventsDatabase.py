@@ -188,8 +188,6 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
         else:
             last_recurrance = extendAndFormatDate(last_recurrance)
         lastDate = last_recurrance.split("-") 
-        # print(lastDate[1])
-        # print(lastDate)
         lastDatetime = datetime(int(lastDate[0]), int(lastDate[1]), int(lastDate[2])) #yy mm dd
         
         if recurs == "daily":
@@ -336,7 +334,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     
     if recurs:
         recurs = recurs.lower()
-        currentQuery = f'recurs = "{recurs}"' if recurs != "none" else f'recurs is "{null}"'
+        currentQuery = f'recurs = "{recurs}"' if recurs != "none" else f'recurs is "{None}"'
         backedQuery = currentQuery if not backedQuery else f" and {currentQuery}"
     
         if not filterQuery:
