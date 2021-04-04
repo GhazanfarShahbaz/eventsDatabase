@@ -3,6 +3,23 @@ import sqlite3 as sql
 from datetime import datetime
 from stringcolor import cs 
 
+monthDays = {
+   1: 31, 
+   2: 28, #28 during leap year
+   3: 31, 
+   4: 30, 
+   5: 31, 
+   6: 30,
+   7: 31,
+   8: 31,
+   9: 30,
+   10: 31,
+   12: 31
+}
+
+
+
+
 def connectToDb() -> tuple:
     connection = sql.connect("events.db")       # sql.Connection
     cursor = connection.cursor()                # sql.Cursor
@@ -31,7 +48,7 @@ def createTable() -> None:
 
 
 def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
-    if not(eventName and startDate) or (last_recurrance and not recurs):
+    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400)):
         return False 
 
     connection, cursor = connectToDb()
@@ -46,7 +63,7 @@ def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance
     dateAdded = f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}" 
 
     if exists:
-        print("EXISts")
+        print("This entry already exists")
         return False
 
     #For loop to add recurring events
@@ -181,13 +198,13 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
 
         currentQuery += filterQuery
 
-    if not recurs:
+    if not recurs and filterQuery:
         currentQuery = ""
         backedQuery = "" if not backedQuery else "and" + backedQuery
         if begin_date and end_date_filter:
-            currentQuery = f"or (last_recurrance >= {begin_date} and last_recurrance <= {end_date_filter} and {filterQuery[5:]})"
+            currentQuery = f"or (last_recurrance >= {begin_date} and (last_recurrance <= {end_date_filter} or last_recurrance is Null) and {filterQuery[5:]})"
         elif begin_date:
-            currentQuery = f"or (begin_date <= {begin_date} and last_recurrance >= {begin_date} {backedQuery})"
+            currentQuery = f"or (begin_date <= {begin_date} and (last_recurrance >= {begin_date} or last_recurrance is Null) {backedQuery})"
             None
         
         filterQuery = f"where ({filterQuery[5:]}) {currentQuery}"
