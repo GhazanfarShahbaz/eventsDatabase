@@ -95,15 +95,21 @@ def createTable() -> None:
     connection.close()
 
 
-def addToTable(eventName, startDate, time = None, end_time = None,recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
-    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400) or int(time[2:]) >= 60) or (end_time and (end_time < 0 or time >= 2400) or int(end_time[2:]) >= 60):
+def addToTable(eventName, startDate, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
+
+    if not(eventName and startDate) or (last_recurrance and not recurs):
         return False 
 
     connection, cursor = connectToDb()
     data = cursor.execute("Select Count(id) from events")
     count = data.fetchone()[0]
 
-    data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time if not None else null}" and begin_date = "{startDate if not None else null}" and recurs = "{recurs if not None else null}" and description = "{description if not None else null}"')
+    if not time:
+        time = 0
+    if not end_time:
+        end_time = time
+    
+    data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{startDate if startDate else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
 
     exists = data.fetchone()
 
@@ -113,21 +119,20 @@ def addToTable(eventName, startDate, time = None, end_time = None,recurs = None,
     if exists:
         print("This entry already exists")
         return False
-
-    #For loop to add recurring events
+    
     cursor.execute(f'''
                         Insert into events(id, event_name, begin_date, time, end_time, recurs, last_recurrance, date_added, type_of_event, description) 
                         VALUES(
                             "{count}",
                             "{eventName}", 
                             "{startDate}", 
-                            "{time if not None else 0}", 
-                            "{end_time if not None else 0}", 
-                            "{recurs if not None else null}", 
-                            "{last_recurrance if not None else null}", 
+                            "{time}", 
+                            "{end_time}", 
+                            "{recurs if recurs else None}", 
+                            "{last_recurrance if last_recurrance else None}", 
                             "{dateAdded}", 
-                            "{type_of_event if not None else null}", 
-                            "{description if not None else null}"
+                            "{type_of_event if type_of_event else None}", 
+                            "{description if description else None}"
                             )
                     ''')
 
@@ -263,7 +268,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     data = cursor.execute(query)
 
     for row in data:
-        print(row)
+        printRow(row)
     
 
     connection.close()
@@ -281,7 +286,7 @@ def printDatabase() -> None:
     else:
         data = cursor.execute("Select * from Events")
         for row in data:
-            print(row)
+            printRow(row)
 
 
     connection.close()
@@ -300,44 +305,31 @@ def printRow(row) -> None:
     Rows[8] = type of event
     Rows[9] = description
     """
-    eventString = f"{row[1]}"
+    if row[4] == "None" or not row[4]:
+        return
+    eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
 
     # print(row)
-    # timeString = ""
-    # if row[3]:
-    #     timeRow = str(row[3])
-    #     hour = 0 
-    #     minute = 0
+    print(eventString)
 
-    #     for char in timeRow[:2]:
-    #         hour = hour*10 + char 
-        
-    #     for char in timeRow[2:]:
-    #         minute = minute*10 + char 
-
-    #     # if hour > 12:
-
-    # if not row[4]:
-    #     rowString = f"{row[1]} occurs on {row[2]}"
-    # # rowString = f"{row[1]} occurs {since if row[4] else on}"
+    
 
 def  dateToString(date: str) -> str:
     date = date.split("/")
     return f"{monthName[int(date[0])]} {dayPrefix[int(date[1])]} {date[2]}"
 
 
-def timeToString(timeString: str) -> str:
-    hour = int(timeString[:2]) 
+def timeToString(timeString: int) -> str:
+    timeString = str(timeString)
+    
+    if len(timeString) < 4:
+        timeString = "0"*(4-len(timeString)) + timeString
+
+    hour = int(timeString[:2])
     hour = hour - 12
     amOrPm = "AM " if hour < 0 else "PM"
     hour = abs(hour)
 
-    return f"{hour}:{timeString[2:]} {amOrPm}"
-
-
-
-# createTable()
-# addToTable("test", "03/20/20")
-
+    return f"{hour}:{timeString[:2]} {amOrPm}"
 
 createTable()

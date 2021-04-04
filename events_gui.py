@@ -12,7 +12,7 @@ def addToDatabaseLabels() -> None:
         last_reccurance = last_reccurance_input.get().strip()
         type_of_event = type_of_event_input.get().strip()
         description = desription_input.get().strip()
-        addToTable(event_name, begin_date, time, recurs, last_reccurance, type_of_event, description)
+        addToTable(event_name, begin_date, time, None, recurs, last_reccurance, type_of_event, description)
 
     event_name_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 50, window=event_name_text)  
