@@ -51,7 +51,20 @@ dayPrefix = {
     31: "31st",
 }
 
-
+monthName = {
+    1: "January", 
+    2: "February",
+    3: "March",
+    4: "April",
+    5: "May",
+    6: "June",
+    7: "July",
+    8: "August",
+    9: "September",
+    10: "October",
+    11: "November",
+    12: "December"
+}
 
 
 def connectToDb() -> tuple:
@@ -275,27 +288,43 @@ def printDatabase() -> None:
 
 
 def printRow(row) -> None:
-    print(row)
-    timeString = ""
-    if row[3]:
-        timeRow = str(row[3])
-        hour = 0 
-        minute = 0
+    """
+    Rows[0] = id
+    Rows[1] = event name
+    Rows[2] = start date 
+    Rows[3] = time 
+    Rows[4] = end time 
+    Rows[5] = recurs 
+    Rows[6] = last recurrance 
+    Rows[7] = date added 
+    Rows[8] = type of event
+    Rows[9] = description
+    """
+    eventString = f"{row[1]}"
 
-        for char in timeRow[:2]:
-            hour = hour*10 + char 
+    # print(row)
+    # timeString = ""
+    # if row[3]:
+    #     timeRow = str(row[3])
+    #     hour = 0 
+    #     minute = 0
+
+    #     for char in timeRow[:2]:
+    #         hour = hour*10 + char 
         
-        for char in timeRow[2:]:
-            minute = minute*10 + char 
+    #     for char in timeRow[2:]:
+    #         minute = minute*10 + char 
 
-        # if hour > 12:
+    #     # if hour > 12:
 
-    if not row[4]:
-        rowString = f"{row[1]} occurs on {row[2]}"
-    # rowString = f"{row[1]} occurs {since if row[4] else on}"
+    # if not row[4]:
+    #     rowString = f"{row[1]} occurs on {row[2]}"
+    # # rowString = f"{row[1]} occurs {since if row[4] else on}"
+
+def  dateToString(dateStirng: str) -> str:
 
 
-def timeToPrintForm(timeString: str) -> str:
+def timeToString(timeString: str) -> str:
     hour = int(timeString[:2]) 
     hour = hour - 12
     amOrPm = "AM " if hour < 0 else "PM"
