@@ -101,7 +101,7 @@ def validateDate(date: str) -> bool:
         return True
 
     try:
-        datetime.strptime(date, '%m/%d/%Y')
+        datetime.strptime(date, '%Y-%m-%d')
     except ValueError:
         return False
     return True
@@ -115,7 +115,11 @@ def validateTime(time: str) -> bool:
     if hour >= 24:
         return False 
     return True if int(time[2:]) < 60 else False
-    
+
+def extendAndFormatDate(date: str) -> str:
+    dateList = date.split("/")
+    return f"{date[0]}-{date[1] if int(date[1]) >= 10 else f'0{date[1]}'}-{date[2] if int(date[2]) >= 10 else f'0{date[2]}'}"
+
 
 def extendTime(time: str) -> str:
     if not time:
@@ -129,6 +133,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
     time = extendTime(time)
     end_time = extendTime(end_time)
     if not (eventName or date) or (last_recurrance and not recurs) or not(validateDate(time) or validateDate(end_time) or validateDate(date) or validateDate(last_recurrance)):
+        print("Failed validation")
         return False
 
     connection, cursor = connectToDb()
@@ -140,7 +145,8 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
     exists = data.fetchone()
 
     todaysDate = datetime.now()
-    dateAdded = f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}" 
+    dateAdded = extendAndFormatDate(f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
+    date = extendAndFormatDate(date)
 
     if exists:
         print("This entry already exists")
@@ -166,10 +172,14 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                         ''')
     else:
         currentDate = date.split("/")
-        currentMonth, currentDay, currentYear = int(date[0]), int(date[1]), int(date[2])
+        currentMonth, currentDay, currentYear = int(currentDate[0]), int(currentDate[1]), int(currentDate[2])
         if not last_recurrance:
             last_recurrance = "12/31/2099"
+        currentDate = f"{currentMonth}/{currentDay}/{currentYear}"
+        lastDate = last_recurrance.split("/")
         if recurs == "daily":
+            print("test")
+            print(currentDate, last_recurrance)
             while currentDate < last_recurrance:
                 cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
@@ -187,6 +197,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                             "{description if description else None}"
                             )
                     ''')
+                connection.commit()
                 if currentDay + 1 <= monthDays[currentMonth]:
                     currentDay += 1
                 elif currentDay + 1 > monthDays[currentMonth]:
@@ -199,7 +210,8 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                         currentYear += 1
                 
                 currentDate = f"{currentMonth}/{currentDay}/{currentYear}"
-
+                # print("Test added:", currentDate)
+            print(currentDate, last_recurrance, currentDate < last_recurrance)
 
 
 
@@ -354,6 +366,7 @@ def printDatabase() -> None:
     else:
         data = cursor.execute("Select * from Events")
         for row in data:
+            print(row)
             printRow(row)
 
 
@@ -373,8 +386,8 @@ def printRow(row) -> None:
     Rows[8] = type of event
     Rows[9] = description
     """
-    if row[4] == "None" or not row[4]:
-        return
+    # if row[4] == "None" or not row[4]:
+    #     return
     eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
 
     if row[5] != "None" and row[5]:
@@ -382,8 +395,8 @@ def printRow(row) -> None:
         if row[6] != "None" and row[6]:
             eventString += f" until {row[6]}"
 
-    if row[8] != "none" and row[8]:
-        eventString += f" and is a {row[8]} type event"
+    if row[9] != "None" and row[9]:
+        eventString += f" and is a {row[9]} type event"
     # print(row) 
     print(eventString)
 
