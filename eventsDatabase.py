@@ -309,27 +309,38 @@ def printRow(row) -> None:
         return
     eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
 
-    # print(row)
+    if row[5] != "None" and row[5]:
+        eventString += f" recurs {row[5]}"
+        if row[6] != "None" and row[6]:
+            eventString += f" until {row[6]}"
+
+    if row[8] != "none" and row[8]:
+        eventString += f" and is a {row[8]} type event"
+    # print(row) 
     print(eventString)
 
     
 
 def  dateToString(date: str) -> str:
     date = date.split("/")
-    return f"{monthName[int(date[0])]} {dayPrefix[int(date[1])]} {date[2]}"
+    return f"{monthName[int(date[0])]} {dayPrefix[int(date[1])]} {date[2]}".strip()
 
 
 def timeToString(timeString: int) -> str:
-    timeString = str(timeString)
+    timeString = str(timeString).strip()
     
     if len(timeString) < 4:
         timeString = "0"*(4-len(timeString)) + timeString
-
+    print(timeString)
     hour = int(timeString[:2])
-    hour = hour - 12
-    amOrPm = "AM " if hour < 0 else "PM"
+    amOrPm = "AM" if hour >= 12 else "PM"
+
+    if hour  > 12:
+        hour %= 12
+    elif hour == 0:
+        hour = 12
     hour = abs(hour)
 
-    return f"{hour}:{timeString[:2]} {amOrPm}"
+    return f"{hour}:{timeString[2:]} {amOrPm}"
 
 createTable()
