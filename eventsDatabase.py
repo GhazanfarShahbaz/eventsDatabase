@@ -80,10 +80,11 @@ def createTable() -> None:
                         Create table if not exists Events(
                             id integer primary key, 
                             event_name text not null,
-                            begin_date text not null,
+                            date text not null,
                             time integer,
                             end_time integer,
-                            recurs text, 
+                            recurs text,
+                            start_recurrance text, 
                             last_recurrance text,
                             date_added text, 
                             type_of_event text,
@@ -93,6 +94,31 @@ def createTable() -> None:
 
     connection.commit()
     connection.close()
+
+def validateDate(date: str) -> bool:
+    if not date:
+        return True
+
+    try:
+        datetime.strptime(date, '%m/%d/%Y')
+    except ValueError:
+        return False
+    return True
+
+def validateTime(time: str) -> bool:
+    try:
+        int(time)
+    except ValueError:
+        return False
+    hour = int(time[:2])
+    if hour >= 24:
+        return False 
+    return True if int(time[2:]) < 60 else False
+    
+
+def extendTime(time: str) -> str:
+    date = "0"*(4-len(time)) + time
+    return date
 
 
 def addToTable(eventName, startDate, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
