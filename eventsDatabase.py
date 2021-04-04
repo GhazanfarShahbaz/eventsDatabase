@@ -3,6 +3,14 @@ import sqlite3 as sql
 from datetime import datetime
 from stringcolor import cs 
 
+"""
+    Notes 
+    Sqlite accepts dates in the format YYYY-MM-DD 
+    turn date mm/dd/yy -> YYYY-MM-DD 
+    Query -> WHERE DATE(date) BETWEEN 'some date' AND 'another date'
+"""
+
+
 monthDays = {
    1: 31, 
    2: 28, #28 during leap year
