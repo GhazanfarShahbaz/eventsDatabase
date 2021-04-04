@@ -117,23 +117,22 @@ def validateTime(time: str) -> bool:
     
 
 def extendTime(time: str) -> str:
+    if not time:
+        time = ""
+
     date = "0"*(4-len(time)) + time
     return date
 
 
 def addToTable(eventName, startDate, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
-
-    if not(eventName and startDate) or (last_recurrance and not recurs):
-        return False 
+    time = extendTime(time)
+    end_time = extendTime(end_time)
+    if not (eventName or startDate) or (last_recurrance and not recurs) or not(validateDate(time) or validateDate(end_time) or validateDate(startDate) or validateDate(last_recurrance)):
+        return False
 
     connection, cursor = connectToDb()
     data = cursor.execute("Select Count(id) from events")
     count = data.fetchone()[0]
-
-    if not time:
-        time = 0
-    if not end_time:
-        end_time = time
     
     data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{startDate if startDate else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
 
