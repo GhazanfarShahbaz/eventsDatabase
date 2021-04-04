@@ -82,7 +82,7 @@ def createTable() -> None:
 
 
 def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
-    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400)):
+    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400) or int(time[2:]) >= 60):
         return False 
 
     connection, cursor = connectToDb()
@@ -291,7 +291,15 @@ def printRow(row) -> None:
     if not row[4]:
         rowString = f"{row[1]} occurs on {row[2]}"
     # rowString = f"{row[1]} occurs {since if row[4] else on}"
-    
+
+
+def timeToPrintForm(timeString: str) -> str:
+    hour = int(timeString[:2]) 
+    hour = hour - 12
+    amOrPm = "AM " if hour < 0 else "PM"
+    hour = abs(hour)
+
+    return f"{hour}:{timeString[2:]} {amOrPm}"
 
 
 
