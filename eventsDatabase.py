@@ -69,6 +69,7 @@ def createTable() -> None:
                             event_name text not null,
                             begin_date text not null,
                             time integer,
+                            end_time integer,
                             recurs text, 
                             last_recurrance text,
                             date_added text, 
@@ -81,8 +82,8 @@ def createTable() -> None:
     connection.close()
 
 
-def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
-    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400) or int(time[2:]) >= 60):
+def addToTable(eventName, startDate, time = None, end_time = None,recurs = None, last_recurrance = None, type_of_event = None, description = None) -> bool:
+    if not(eventName and startDate) or (last_recurrance and not recurs) or (time and (time < 0 or time >= 2400) or int(time[2:]) >= 60) or (end_time and (end_time < 0 or time >= 2400) or int(end_time[2:]) >= 60):
         return False 
 
     connection, cursor = connectToDb()
@@ -102,12 +103,13 @@ def addToTable(eventName, startDate, time = None, recurs = None, last_recurrance
 
     #For loop to add recurring events
     cursor.execute(f'''
-                        Insert into events(id, event_name, begin_date, time, recurs, last_recurrance, date_added, type_of_event, description) 
+                        Insert into events(id, event_name, begin_date, time, end_time, recurs, last_recurrance, date_added, type_of_event, description) 
                         VALUES(
                             "{count}",
                             "{eventName}", 
                             "{startDate}", 
-                            "{time if not None else null}", 
+                            "{time if not None else 0}", 
+                            "{end_time if not None else 0}", 
                             "{recurs if not None else null}", 
                             "{last_recurrance if not None else null}", 
                             "{dateAdded}", 
