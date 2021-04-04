@@ -321,7 +321,9 @@ def printRow(row) -> None:
     #     rowString = f"{row[1]} occurs on {row[2]}"
     # # rowString = f"{row[1]} occurs {since if row[4] else on}"
 
-def  dateToString(dateStirng: str) -> str:
+def  dateToString(date: str) -> str:
+    date = date.split("/")
+    return f"{monthName[int(date[0])]} {dayPrefix[int(date[1])]} {date[2]}"
 
 
 def timeToString(timeString: str) -> str:
