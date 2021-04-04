@@ -22,6 +22,7 @@ monthDays = {
    8: 31,
    9: 30,
    10: 31,
+   11: 30,
    12: 31
 }
 
@@ -87,7 +88,7 @@ def createTable() -> None:
 
     cursor.execute( """
                         Create table if not exists Events(
-                            id integer primary key, 
+                            id integer not null, 
                             event_name text not null,
                             date text not null,
                             time integer,
@@ -109,7 +110,7 @@ def validateDate(date: str) -> bool:
         return True
 
     try:
-        datetime.strptime(date, '%Y-%m-%d')
+        datetime.strptime(date, '%m/%d/%Y')
     except ValueError:
         return False
     return True
@@ -126,7 +127,7 @@ def validateTime(time: str) -> bool:
 
 def extendAndFormatDate(date: str) -> str:
     dateList = date.split("/")
-    return f"{date[0]}-{date[1] if int(date[1]) >= 10 else f'0{date[1]}'}-{date[2] if int(date[2]) >= 10 else f'0{date[2]}'}"
+    return f"{dateList[2]}-{dateList[0] if int(dateList[0]) >= 10  or len(dateList[0]) > 1 else f'0{dateList[0]}'}-{dateList[1] if int(dateList[1]) >= 10  or len(dateList[1]) > 1 else f'0{dateList[1]}'}"
 
 
 def extendTime(time: str) -> str:
@@ -145,7 +146,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
         return False
 
     connection, cursor = connectToDb()
-    data = cursor.execute("Select Count(id) from events")
+    data = cursor.execute("Select Count(distinct(id)) from events")
     count = data.fetchone()[0]
     
     # data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{date if date else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
@@ -179,16 +180,21 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                                 )
                         ''')
     else:
-        currentDate = date.split("/")
-        currentMonth, currentDay, currentYear = int(currentDate[0]), int(currentDate[1]), int(currentDate[2])
+        currentDate = date.split("-")
+        currentYear, currentMonth, currentDay = int(currentDate[0]), int(currentDate[1]), int(currentDate[2])
+
         if not last_recurrance:
-            last_recurrance = "12/31/2099"
-        currentDate = f"{currentMonth}/{currentDay}/{currentYear}"
-        lastDate = last_recurrance.split("/")
+            last_recurrance = "2099-12-31"
+        else:
+            last_recurrance = extendAndFormatDate(last_recurrance)
+        lastDate = last_recurrance.split("-") 
+        # print(lastDate[1])
+        # print(lastDate)
+        lastDatetime = datetime(int(lastDate[0]), int(lastDate[1]), int(lastDate[2])) #yy mm dd
+        
         if recurs == "daily":
-            print("test")
-            print(currentDate, last_recurrance)
-            while currentDate < last_recurrance:
+            print("Started Adding")
+            while datetime(currentYear, currentMonth , currentDay) < lastDatetime:
                 cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
                         VALUES(
@@ -217,10 +223,10 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                         currentDay = 1
                         currentYear += 1
                 
-                currentDate = f"{currentMonth}/{currentDay}/{currentYear}"
+                currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
                 # print("Test added:", currentDate)
-            print(currentDate, last_recurrance, currentDate < last_recurrance)
-
+            # print(currentDate, last_recurrance, currentDate < last_recurrance)
+            print("Finished adding")
 
 
 
@@ -375,7 +381,7 @@ def printDatabase() -> None:
         data = cursor.execute("Select * from Events")
         for row in data:
             print(row)
-            printRow(row)
+            # printRow(row)
 
 
     connection.close()
@@ -394,8 +400,8 @@ def printRow(row) -> None:
     Rows[8] = type of event
     Rows[9] = description
     """
-    # if row[4] == "None" or not row[4]:
-    #     return
+    if row[4] == "None" or not row[4]:
+        return
     eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
 
     if row[5] != "None" and row[5]:
@@ -405,14 +411,14 @@ def printRow(row) -> None:
 
     if row[9] != "None" and row[9]:
         eventString += f" and is a {row[9]} type event"
-    # print(row) 
+    print(row) 
     print(eventString)
 
     
 
 def  dateToString(date: str) -> str:
-    date = date.split("/")
-    return f"{monthName[int(date[0])]} {dayPrefix[int(date[1])]} {date[2]}".strip()
+    date = date.split("-")
+    return f"{monthName[int(date[2])]} {dayPrefix[int(date[1])]} {date[0]}".strip()
 
 
 def timeToString(timeString: int) -> str:
