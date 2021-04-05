@@ -8,6 +8,14 @@ from stringcolor import cs
     Sqlite accepts dates in the format YYYY-MM-DD 
     turn date mm/dd/yy -> YYYY-MM-DD 
     Query -> WHERE DATE(date) BETWEEN 'some date' AND 'another date'
+
+
+    Next Implementation:
+        Implement bash commands 
+        
+        Calculate free time
+
+        Change how row is printed
 """
 
 
@@ -77,7 +85,15 @@ monthName = {
 }
 
 allowed_recurs = {"no", "daily", "weekly", "monthly", "yearly"}
-weekdays = {"m" : 0, "t" : 1, "w": 2, "th": 3, "f": 4, "sat":5, "sun":6}
+weekdays = {
+    "m": 0,
+    "t" : 1, 
+    "w": 2, 
+    "th": 3, 
+    "f": 4, 
+    "sat": 5, 
+    "sun": 6
+}
 
 def connectToDb() -> tuple:
     connection = sql.connect("events.db")       # sql.Connection
@@ -458,8 +474,6 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     connection.close()
 
 
-
-
 def printDatabase() -> None:
     connection, cursor = connectToDb()
 
@@ -505,7 +519,7 @@ def printRow(row) -> None:
 
     
 
-def  dateToString(date: str) -> str:
+def dateToString(date: str) -> str:
     date = date.split("-")
     return f"{monthName[int(date[1])]} {dayPrefix[int(date[2])]} {date[0]}".strip()
 
