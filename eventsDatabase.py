@@ -76,6 +76,7 @@ monthName = {
 }
 
 allowed_recurs = {"no", "daily", "weekly", "monthly", "yearly"}
+weekdays = {"m" : 0, "t" : 1, "w": 2, "th": 3, "f": 4, "sat":5, "sun":6}
 
 def connectToDb() -> tuple:
     connection = sql.connect("events.db")       # sql.Connection
@@ -296,6 +297,57 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                 currentYear += 1
 
                 currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
+        else:
+            recurs = recurs.split(",")
+            days = set()
+            for recur in recurs:
+                if recur not in weekdays.keys():
+                    print("Invalid sequence")
+                    return False
+                else:
+                    days.add(weekdays[recur])
+            
+            recurString = ""
+            recurList = sorted[recurs.split(",")]
+            recurString = recurList[0]
+
+            for recur in recurList[1:]:
+                recurString += f"/{recur}"
+
+            while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
+                if datetime.strptime(date, '%Y-%m-%d').isoweekday() in days:
+                   cursor.execute(f'''
+                        Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
+                        VALUES(
+                            "{count}",
+                            "{eventName}", 
+                            "{currentDate}", 
+                            "{time}", 
+                            "{end_time}", 
+                            "{recurString}", 
+                            "{last_recurrance}", 
+                            "{date}", 
+                            "{dateAdded}", 
+                            "{type_of_event if type_of_event else None}", 
+                            "{description if description else None}"
+                            )
+                    ''')
+                
+                if currentDay + 1 <= monthDays[currentMonth]:
+                    currentDay += 1
+                elif currentDay + 1 > monthDays[currentMonth]:
+                    if currentMonth < 12:
+                        currentMonth += 1
+                        currentDay = 1
+                    else:
+                        currentMonth = 1
+                        currentDay = 1
+                        currentYear += 1
+                
+                currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
+
+                
+
         print("Finished adding")
 
 
