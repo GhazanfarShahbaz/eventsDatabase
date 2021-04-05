@@ -51,6 +51,7 @@ dayPrefix = {
     22: "22nd",
     23: "23rd",
     24: "24th",
+    25: "25th",
     26: "26th",
     26: "26th",
     27: "27th",
@@ -467,10 +468,9 @@ def printDatabase() -> None:
     if isEmpty:
         print("Database is empty :(")
     else:
-        data = cursor.execute("Select * from Events")
+        data = cursor.execute("Select * from Events group by id")
         for row in data:
-            print(row)
-            # printRow(row)
+            printRow(row)
 
 
     connection.close()
@@ -500,14 +500,14 @@ def printRow(row) -> None:
 
     if row[9] != "None" and row[9]:
         eventString += f" and is a {row[9]} type event"
-    print(row) 
+
     print(eventString)
 
     
 
 def  dateToString(date: str) -> str:
     date = date.split("-")
-    return f"{monthName[int(date[2])]} {dayPrefix[int(date[1])]} {date[0]}".strip()
+    return f"{monthName[int(date[1])]} {dayPrefix[int(date[2])]} {date[0]}".strip()
 
 
 def timeToString(timeString: int) -> str:
@@ -515,9 +515,8 @@ def timeToString(timeString: int) -> str:
     
     if len(timeString) < 4:
         timeString = "0"*(4-len(timeString)) + timeString
-    print(timeString)
     hour = int(timeString[:2])
-    amOrPm = "AM" if hour >= 12 else "PM"
+    amOrPm = "AM" if hour < 12 else "PM"
 
     if hour  > 12:
         hour %= 12

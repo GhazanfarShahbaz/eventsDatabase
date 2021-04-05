@@ -31,7 +31,7 @@ def addToDatabaseLabels() -> None:
     window.create_window(200, 100, window=time_input)
 
     end_time_text = tk.Label(root, text = "End Time:")
-    window.create_window(79, 125, window=time_text)  
+    window.create_window(79, 125, window=end_time_text)  
     end_time_input = tk.Entry(root) 
     window.create_window(200, 125, window=end_time_input)
 
