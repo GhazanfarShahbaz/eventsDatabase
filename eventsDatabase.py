@@ -86,13 +86,13 @@ monthName = {
 
 allowed_recurs = {"no", "daily", "weekly", "monthly", "yearly"}
 weekdays = {
-    "m": 0,
-    "t" : 1, 
-    "w": 2, 
-    "th": 3, 
-    "f": 4, 
-    "sat": 5, 
-    "sun": 6
+    "m": 1,
+    "t" : 2, 
+    "w": 3, 
+    "th": 4, 
+    "f": 5, 
+    "sat": 6, 
+    "sun": 1
 }
 
 def connectToDb() -> tuple:
@@ -333,7 +333,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                 recurString += f"/{recur}"
 
             while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
-                if datetime.strptime(currentDate, '%Y-%m-%d').isoweekday() in days:
+                if int(datetime(currentYear, currentMonth, currentDay).strftime("%w")) in days: #datetime.strptime(currentDate, '%Y-%m-%d').isoweekday() in days:
                    cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
                         VALUES(
@@ -540,4 +540,32 @@ def timeToString(timeString: int) -> str:
 
     return f"{hour}:{timeString[2:]} {amOrPm}"
 
+def databaseToCsv() -> None:
+    connection, cursor = connectToDb()
+    data = cursor.execute("Select * from Events")
+
+
+    currentFile = open("events.csv", "w")
+
+    columnString = ""
+    for t in data.description:
+        columnString += t[0] + ", "
+
+    # print(columnString)
+    columnString = columnString[:len(columnString)-2]
+    currentFile.write(columnString + "\n")
+
+    for eventRow in data:
+        eventString = str(eventRow[0])
+        for columns in eventRow[1:]:
+            eventString += f", {columns}"
+
+        currentFile.write(eventString + "\n")
+
+    #  currentFile.close()
+    #  connection.close()
+
+
+
 createTable()
+databaseToCsv()
