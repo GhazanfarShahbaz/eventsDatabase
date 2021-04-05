@@ -363,7 +363,6 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
 
     query = "Select * from Events "
     filterQuery = ""
-    backedQuery = ""
     if eventName:
         currentQuery = ""
         eventName = eventName.lower()
@@ -379,43 +378,24 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     if not begin_date and end_date_filter: 
         begin_date, end_date_filter = end_date_filter, begin_date
 
-    start_date_operation = "="
-    end_date_operation = "="
-
     if begin_date and end_date_filter:
-        # date_format = '%m/%d/%Y'
-        # print(end_date_filter)
-        # try:
-        #     datetime.strptime(begin_date, date_format)
-        #     datetime.strptime(end_date_filter, date_format)
-        # except ValueError:
-        #     print("Invalid Format")
-        #     return 
-        
-        if begin_date <= end_date_filter:
-            start_date_operation = ">="
-            end_date_operation = "<="
-        else:
-            begin_date, end_date_filter = end_date_filter, begin_date
-    if begin_date:
+        begin_date = extendAndFormatDate(begin_date)
+        end_date_filter = extendAndFormatDate(end_date_filter)
         currentQuery = ""
 
         if not filterQuery:
-            currentQuery = f'where begin_date {start_date_operation} "{begin_date}"'
-
+            currentQuery = f'where date(date) between "{begin_date}" and "{end_date_filter}"'
         else:
-            currentQuery = f' and begin_date {start_date_operation} "{begin_date}"'
-        
-        filterQuery += currentQuery 
-        
-    if end_date_filter:
+            currentQuery = f' and date(date) between "{begin_date}" and "{end_date_filter}"'
+    elif begin_date:
+        begin_date = extendAndFormatDate(begin_date)
         currentQuery = ""
 
         if not filterQuery:
-            currentQuery = f'where begin_date {end_date_operation} "{end_date_filter}"'
+            currentQuery = f'where begin_date  = "{begin_date}"'
 
         else:
-            currentQuery = f' and begin_date {end_date_operation} "{end_date_filter}"'
+            currentQuery = f' and begin_date = "{begin_date}"'
         
         filterQuery += currentQuery 
     
@@ -443,7 +423,6 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             currentQuery = f' and time {start_time_operation} "{time}"'
         
         filterQuery += currentQuery 
-        backedQuery += f'time {start_time_operation} "{time}"' if not backedQuery else  f' and time {start_time_operation} "{time}"'
         
     if end_time_filter:
         currentQuery = ""
@@ -455,12 +434,10 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             currentQuery = f' and time {end_time_operation} "{end_time_filter}"'
         
         filterQuery += currentQuery 
-        backedQuery += f'time {end_time_operation} "{end_time_filter}"' if not backedQuery else  f' and time {end_time_operation} "{end_time_filter}"'
     
     if recurs:
         recurs = recurs.lower()
         currentQuery = f'recurs = "{recurs}"' if recurs != "none" else f'recurs is "{None}"'
-        backedQuery = currentQuery if not backedQuery else f" and {currentQuery}"
     
         if not filterQuery:
             currentQuery = "where " + currentQuery
@@ -468,17 +445,6 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             currentQuery = " and" + currentQuery
 
         currentQuery += filterQuery
-
-    if not recurs and filterQuery:
-        currentQuery = ""
-        backedQuery = "" if not backedQuery else "and" + backedQuery
-        if begin_date and end_date_filter:
-            currentQuery = f"or (last_recurrance >= {begin_date} and (last_recurrance <= {end_date_filter} or last_recurrance is Null) and {filterQuery[5:]})"
-        elif begin_date:
-            currentQuery = f"or (begin_date <= {begin_date} and (last_recurrance >= {begin_date} or last_recurrance is Null) {backedQuery})"
-            None
-        
-        filterQuery = f"where ({filterQuery[5:]}) {currentQuery}"
         
     query += filterQuery
     print(query)
