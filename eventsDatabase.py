@@ -308,14 +308,15 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                     days.add(weekdays[recur])
             
             recurString = ""
-            recurList = sorted[recurs.split(",")]
+            recurList = sorted(recurs)
             recurString = recurList[0]
 
             for recur in recurList[1:]:
                 recurString += f"/{recur}"
-
+            currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
             while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
-                if datetime.strptime(date, '%Y-%m-%d').isoweekday() in days:
+                print(currentDate)
+                if datetime.strptime(currentDate, '%Y-%m-%d').isoweekday() in days:
                    cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
                         VALUES(
