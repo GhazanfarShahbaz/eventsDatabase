@@ -190,6 +190,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
             last_recurrance = extendAndFormatDate(last_recurrance)
         lastDate = last_recurrance.split("-") 
         lastDatetime = datetime(int(lastDate[0]), int(lastDate[1]), int(lastDate[2])) #yy mm dd
+        currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
         print("Started Adding")
         if recurs == "daily":
             while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
@@ -313,9 +314,8 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
 
             for recur in recurList[1:]:
                 recurString += f"/{recur}"
-            currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
+
             while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
-                print(currentDate)
                 if datetime.strptime(currentDate, '%Y-%m-%d').isoweekday() in days:
                    cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
