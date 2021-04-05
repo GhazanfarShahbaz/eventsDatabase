@@ -189,10 +189,9 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
             last_recurrance = extendAndFormatDate(last_recurrance)
         lastDate = last_recurrance.split("-") 
         lastDatetime = datetime(int(lastDate[0]), int(lastDate[1]), int(lastDate[2])) #yy mm dd
-        
+        print("Started Adding")
         if recurs == "daily":
-            print("Started Adding")
-            while datetime(currentYear, currentMonth , currentDay) < lastDatetime:
+            while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
                 cursor.execute(f'''
                         Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
                         VALUES(
@@ -209,7 +208,6 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                             "{description if description else None}"
                             )
                     ''')
-                connection.commit()
                 if currentDay + 1 <= monthDays[currentMonth]:
                     currentDay += 1
                 elif currentDay + 1 > monthDays[currentMonth]:
@@ -222,9 +220,36 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                         currentYear += 1
                 
                 currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
-                # print("Test added:", currentDate)
-            # print(currentDate, last_recurrance, currentDate < last_recurrance)
-            print("Finished adding")
+        
+
+        if recurs == "weekly":
+            while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
+                cursor.execute(f'''
+                        Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
+                        VALUES(
+                            "{count}",
+                            "{eventName}", 
+                            "{currentDate}", 
+                            "{time}", 
+                            "{end_time}", 
+                            "{recurs}", 
+                            "{last_recurrance}", 
+                            "{date}", 
+                            "{dateAdded}", 
+                            "{type_of_event if type_of_event else None}", 
+                            "{description if description else None}"
+                            )
+                ''')
+                currentDay += 7
+                if currentDay > monthDays[currentMonth]:
+                    currentDay %= monthDays[currentMonth]
+                    if currentMonth < 12:
+                        currentMonth += 1
+                    else:
+                        currentMonth = 1
+                        currentYear += 1
+                currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
+        print("Finished adding")
 
 
 
