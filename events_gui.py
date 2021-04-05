@@ -12,7 +12,7 @@ def addToDatabaseLabels() -> None:
         last_reccurance = last_reccurance_input.get().strip()
         type_of_event = type_of_event_input.get().strip()
         description = desription_input.get().strip()
-        addToTable(event_name, begin_date, time, recurs, last_reccurance, type_of_event, description)
+        addToTable(event_name, begin_date, time, None, recurs, last_reccurance, type_of_event, description)
 
     event_name_text = tk.Label(root, text = "Event Name:")
     window.create_window(57, 50, window=event_name_text)  
@@ -66,29 +66,12 @@ def filterDataLabels() -> None:
         if last_reccurance:
             last_reccurance = int(last_reccurance)
 
-        # # date = date_added_input.get().strip()
-        # if minutes == "":
-        #     minutes = -1
-        # else:
-        #     minutes = int(minutes)
-        # None
         last_reccurance = last_reccurance_2_input.get().strip()
         type_of_event = type_of_event_2_input.get().strip()
         date_added = date_added_input.get().strip()
         description = description_2_input.get().strip()
         end_date = end_date_filter_input.get().strip()
         end_time = end_time_filter_input.get().strip()
-        # before_date = checkbox_before_last_occurence
-        # event_type = end_date_filter_input.get().strip()
-        # event_name_exact =  checkbox_before_last_occurence.get()
-        # before = checkbox__before.get()
-        # after = checkbox__after.get()
-        # before_last_reccurance = checkbox_last_reccurance_before.get()
-        # after_last_reccurance =  checkbox_last_reccurance_after.get()
-        # before_minute = checkbox_minute_before.get()
-        # after_minute = checkbox_minute_after.get() 
-        # before_description = checkbox_desription_before.get()
-        # after_description = checkbox_desription_after.get()
 
         filterDatabase(event_name, begin_date, time, recurs, last_reccurance, type_of_event, date_added, description, end_date, end_time)
 
