@@ -249,6 +249,31 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                         currentMonth = 1
                         currentYear += 1
                 currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
+
+        if recurs == "monthly":
+            while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
+                cursor.execute(f'''
+                        Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
+                        VALUES(
+                            "{count}",
+                            "{eventName}", 
+                            "{currentDate}", 
+                            "{time}", 
+                            "{end_time}", 
+                            "{recurs}", 
+                            "{last_recurrance}", 
+                            "{date}", 
+                            "{dateAdded}", 
+                            "{type_of_event if type_of_event else None}", 
+                            "{description if description else None}"
+                            )
+                ''')
+                currentMonth += 1
+                if currentMonth > 12:
+                    currentMonth = 1
+                    currentYear += 1
+        
+                currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
         print("Finished adding")
 
 
