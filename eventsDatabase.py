@@ -39,6 +39,7 @@ dayPrefix = {
     2: "2nd",
     3: "3rd",
     4: "4th",
+    5: "5th",
     6: "6th",
     6: "6th",
     7: "7th",
@@ -49,7 +50,7 @@ dayPrefix = {
     12: "12th",
     13: "13th",
     14: "14th",
-    16: "16th",
+    15: "15th",
     16: "16th",
     17: "17th",
     18: "18th",
@@ -169,15 +170,15 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
     
     # data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{date if date else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
 
-    exists = data.fetchone()
+    # exists = data.fetchone()
 
     todaysDate = datetime.now()
     dateAdded = extendAndFormatDate(f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
     date = extendAndFormatDate(date)
 
-    if exists:
-        print("This entry already exists")
-        return False
+    # if exists:
+    #     print("This entry already exists")
+    #     return False
 
     recurs = recurs.lower() if recurs else "no" 
     if recurs == "no":
@@ -404,6 +405,8 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             currentQuery = f'where date(date) between "{begin_date}" and "{end_date_filter}"'
         else:
             currentQuery = f' and date(date) between "{begin_date}" and "{end_date_filter}"'
+        
+        filterQuery += currentQuery
     elif begin_date:
         begin_date = extendAndFormatDate(begin_date)
         currentQuery = ""
@@ -422,7 +425,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
     start_time_operation = "="
     end_time_operation = "="
 
-    if time and end_time_filter:
+    if time != -1 and end_time_filter:
         if time <= end_time_filter:
             start_time_operation = ">="
             end_time_operation = "<="
@@ -430,7 +433,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             start_time_operation = "<="
             end_time_operation = ">="
     #Combine statement above
-    if time:
+    if time != -1:
         currentQuery = ""
 
         if not filterQuery:
@@ -461,11 +464,10 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         else: 
             currentQuery = " and" + currentQuery
 
-        currentQuery += filterQuery
+        filterQuery += currentQuery
         
     query += filterQuery
-    print(query)
-    data = cursor.execute(query)
+    data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
 
     for row in data:
         printRow(row)

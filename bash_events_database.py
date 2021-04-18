@@ -1,5 +1,5 @@
 import argparse
-from eventsDatabase import filterData, monthDays
+from eventsDatabase import filterDatabase, monthDays
 from datetime import date, datetime
 
 parser = argparse.ArgumentParser()
@@ -14,11 +14,11 @@ def gate() -> None:
     filterEvents(args.filter)
 
 def filterEvents(filterRange) -> None:
-    acceptedArguments = {"today", "weekly" "month", "year"}
+    acceptedArguments = {"today", "weekly", "month", "year"}
     if  filterRange.strip() in acceptedArguments:
         todaysDate = datetime.now()
         if filterRange == "today":
-            filterData(begindate=f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
+            filterDatabase(begin_date=f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
 
         elif filterRange == "weekly":
             currentDay = date.today().isoweekday()
@@ -48,10 +48,16 @@ def filterEvents(filterRange) -> None:
                 if lastMonth == 13:
                     lastYear += 1
                     
-            filterData(begindate=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastMonth}" )
+            filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastMonth}" )
 
         elif filterRange == "month":
-            filterData(begindate=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
+            # print(f"{todaysDate.month}/{1}/{todaysDate.year}")
+            # print(f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}")
+            filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
 
-        elif filterRange == "month":
-            filterData(begindate=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.yea + 1}" )
+        elif filterRange == "year":
+            filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.yea + 1}" )
+
+
+
+filterEvents("month")
