@@ -60,4 +60,4 @@ def filterEvents(filterRange) -> None:
 
 
 
-filterEvents("month")
+filterEvents("year")
