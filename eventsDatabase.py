@@ -377,7 +377,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
 
 def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", eventType = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0 ) -> None:
     #Add Event Type Filter
-    connection, cursor = connectToDb()
+    # connection, cursor = connectToDb()
 
     query = "Select * from Events "
     filterQuery = ""
@@ -465,15 +465,17 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
             currentQuery = " and" + currentQuery
 
         filterQuery += currentQuery
-        
+    
+    # connection, cursor = connectToDb()
     query += filterQuery
-    data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
+    performQuery(query)
+    # data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
 
-    for row in data:
-        printRow(row)
+    # for row in data:
+    #     printRow(row)
     
 
-    connection.close()
+    # connection.close()
 
 
 def printDatabase() -> None:
@@ -492,6 +494,16 @@ def printDatabase() -> None:
     connection.close()
 
 
+def performQuery(query) -> None:
+    connection, cursor = connectToDb()
+    data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
+
+    for row in data:
+        printRow(row)
+    
+    connection.close()
+
+
 def printRow(row) -> None:
     """
     Rows[0] = id
@@ -505,6 +517,7 @@ def printRow(row) -> None:
     Rows[8] = type of event
     Rows[9] = description
     """
+    # print(row)
     if row[4] == "None" or not row[4]:
         return
     eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""

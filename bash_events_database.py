@@ -1,17 +1,6 @@
 import argparse
-from eventsDatabase import filterDatabase, monthDays
+from eventsDatabase import filterDatabase, monthDays, performQuery
 from datetime import date, datetime
-
-parser = argparse.ArgumentParser()
-
-parser.add_argument("-f","--filter", help="Type of filter: today, month or year", type=str)
-
-args = parser.parse_args()
-
-
-
-def gate() -> None:
-    filterEvents(args.filter)
 
 def filterEvents(filterRange) -> None:
     acceptedArguments = {"today", "weekly", "month", "year"}
@@ -56,8 +45,32 @@ def filterEvents(filterRange) -> None:
             filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
 
         elif filterRange == "year":
-            filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.yea + 1}" )
+            filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.year + 1}" )
+
+# def 
+
+
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-f","--filter", help="Type of filter: today, weekly, month or year", type=str)
+parser.add_argument("-q","--query", help="Write a query", nargs='+')
+
+args = parser.parse_args()
+
+if args.filter:
+    filterEvents(args.filter)
+
+if args.query:
+    query = ""
+    for word in args.query:
+        if word == "all":
+            word = "*"
+        query += word + " "
+
+    # print(query)
+    performQuery(query)
 
 
 
-filterEvents("year")
+
+# if __name__ == '__main__': 
