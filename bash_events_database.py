@@ -1,6 +1,8 @@
 import argparse
 from eventsDatabase import filterDatabase, monthDays, performQuery
 from datetime import date, datetime
+import os 
+
 
 def filterEvents(filterRange) -> None:
     acceptedArguments = {"today", "weekly", "month", "year"}
@@ -54,6 +56,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-f","--filter", help="Type of filter: today, weekly, month or year", type=str)
 parser.add_argument("-q","--query", help="Write a sql query", nargs='+')
+parser.add_argument("--gui", help="run gui")
 
 args = parser.parse_args()
 
@@ -70,7 +73,8 @@ if args.query:
     # print(query)
     performQuery(query)
 
-
+if args.gui:
+    os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py')
 
 
 # if __name__ == '__main__': 
