@@ -56,7 +56,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("-f","--filter", help="Type of filter: today, weekly, month or year", type=str)
 parser.add_argument("-q","--query", help="Write a sql query", nargs='+')
-parser.add_argument("--gui", help="run gui")
+parser.add_argument("--gui", help="run gui", action="store_true")
 
 args = parser.parse_args()
 
