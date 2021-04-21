@@ -582,5 +582,5 @@ def databaseToCsv() -> None:
 
 
 
-createTable()
-databaseToCsv()
+# createTable()
+# databaseToCsv()
