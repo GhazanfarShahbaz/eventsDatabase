@@ -6,7 +6,7 @@ from stringcolor import cs
 """
     Notes 
     Sqlite accepts dates in the format YYYY-MM-DD 
-    turn date mm/dd/yy -> YYYY-MM-DD 
+    turn date mm/dd/yyyy -> YYYY-MM-DD 
     Query -> WHERE DATE(date) BETWEEN 'some date' AND 'another date'
 
 
@@ -160,7 +160,7 @@ def extendTime(time: str) -> str:
 def addToTable(eventName, date, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None, start_recurrance = None) -> bool:
     time = extendTime(time)
     end_time = extendTime(end_time)
-    if not (eventName or date) or (last_recurrance and not recurs) or not(validateDate(time) or validateDate(end_time) or validateDate(date) or validateDate(last_recurrance)):
+    if not (eventName or date) or (last_recurrance and not recurs) or not(validateTime(time) or validateTime(end_time) or validateDate(date) or validateDate(last_recurrance)):
         print("Failed validation")
         return False
 
@@ -168,19 +168,15 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
     data = cursor.execute("Select Count(distinct(id)) from events")
     count = data.fetchone()[0]
     
-    # data = cursor.execute(f'Select * from events where event_name = "{eventName}" and time = "{time}" and end_time = "{end_time}"and begin_date = "{date if date else None}" and recurs = "{recurs if recurs else None}" and description = "{description if description else None}"')
-
-    # exists = data.fetchone()
+    #check for duplicates
 
     todaysDate = datetime.now()
     dateAdded = extendAndFormatDate(f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
     date = extendAndFormatDate(date)
 
-    # if exists:
-    #     print("This entry already exists")
-    #     return False
 
     recurs = recurs.lower() if recurs else "no" 
+
     if recurs == "no":
         cursor.execute(f'''
                             Insert into events(id, event_name, date, time, end_time, recurs, last_recurrance, start_recurrance, date_added, type_of_event, description) 
@@ -210,6 +206,7 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
         lastDatetime = datetime(int(lastDate[0]), int(lastDate[1]), int(lastDate[2])) #yy mm dd
         currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
         print("Started Adding")
+        
         if recurs == "daily":
             while datetime(currentYear, currentMonth , currentDay) <= lastDatetime:
                 cursor.execute(f'''
@@ -466,16 +463,8 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
 
         filterQuery += currentQuery
     
-    # connection, cursor = connectToDb()
     query += filterQuery
     performQuery(query)
-    # data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
-
-    # for row in data:
-    #     printRow(row)
-    
-
-    # connection.close()
 
 
 def printDatabase() -> None:
@@ -489,7 +478,6 @@ def printDatabase() -> None:
         data = cursor.execute("Select * from Events group by id")
         for row in data:
             printRow(row)
-
 
     connection.close()
 
@@ -512,12 +500,12 @@ def printRow(row) -> None:
     Rows[3] = time 
     Rows[4] = end time 
     Rows[5] = recurs 
-    Rows[6] = last recurrance 
-    Rows[7] = date added 
-    Rows[8] = type of event
-    Rows[9] = description
+    Rows[6] = start recurrance 
+    Rows[7] = last recurrance 
+    Rows[8] = date added 
+    Rows[9] = type of event
+    Rows[10] = description
     """
-    # print(row)
     if row[4] == "None" or not row[4]:
         return
     eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
@@ -525,7 +513,7 @@ def printRow(row) -> None:
     if row[5] != "None" and row[5]:
         eventString += f" recurs {row[5]}"
         if row[6] != "None" and row[6]:
-            eventString += f" until {row[6]}"
+            eventString += f" until {row[7]}"
 
     if row[9] != "None" and row[9]:
         eventString += f" and is a {row[9]} type event"
@@ -566,7 +554,6 @@ def databaseToCsv() -> None:
     for t in data.description:
         columnString += t[0] + ", "
 
-    # print(columnString)
     columnString = columnString[:len(columnString)-2]
     currentFile.write(columnString + "\n")
 
@@ -577,10 +564,5 @@ def databaseToCsv() -> None:
 
         currentFile.write(eventString + "\n")
 
-    #  currentFile.close()
-    #  connection.close()
-
-
-
-# createTable()
-# databaseToCsv()
+    currentFile.close()
+    connection.close()
