@@ -42,15 +42,10 @@ def filterEvents(filterRange) -> None:
             filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastMonth}" )
 
         elif filterRange == "month":
-            # print(f"{todaysDate.month}/{1}/{todaysDate.year}")
-            # print(f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}")
             filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
 
         elif filterRange == "year":
             filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.year + 1}" )
-
-# def 
-
 
 parser = argparse.ArgumentParser()
 
@@ -70,11 +65,9 @@ if args.query:
             word = "*"
         query += word + " "
 
-    # print(query)
     performQuery(query)
 
 if args.gui:
     os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py')
 
 
-# if __name__ == '__main__': 

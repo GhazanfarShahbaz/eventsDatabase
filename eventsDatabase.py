@@ -97,7 +97,7 @@ weekdays = {
 }
 
 def connectToDb() -> tuple:
-    connection = sql.connect("events.db")       # sql.Connection
+    connection = sql.connect("/Users/ghazshahbaz/documents/eventsdatabase/events.db")       # sql.Connection
     cursor = connection.cursor()                # sql.Cursor
     return connection, cursor   
 
