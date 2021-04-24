@@ -516,7 +516,7 @@ def printRow(row) -> None:
             eventString += f" until {dateToString(row[7])}"
 
     if row[9] != "None" and row[9]:
-        eventString += f" and is a {cs(row[9], 'blue3')} type event"
+        eventString += f" and is {'a' if row[9][0].lower() not in {'a','e', 'i', 'o', 'u'} else 'an'} {cs(row[9], 'blue3')} type event"
 
     print(eventString)
 
@@ -536,8 +536,6 @@ def orderRecurrance(reccuranceString: str) -> str:
                     string += days
                 else:
                     string += "/" + days
-
-        
 
     return cs(string, "red")
 
