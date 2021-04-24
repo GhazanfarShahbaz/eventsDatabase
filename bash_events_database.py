@@ -5,13 +5,13 @@ import os
 
 
 def filterEvents(filterRange) -> None:
-    acceptedArguments = {"today", "weekly", "month", "year"}
+    acceptedArguments = {"today", "week", "month", "year"}
     if  filterRange.strip() in acceptedArguments:
         todaysDate = datetime.now()
         if filterRange == "today":
             filterDatabase(begin_date=f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
 
-        elif filterRange == "weekly":
+        elif filterRange == "week":
             currentDay = date.today().isoweekday()
             firstDay  = todaysDate.day - currentDay
             firstMonth = todaysDate.month 

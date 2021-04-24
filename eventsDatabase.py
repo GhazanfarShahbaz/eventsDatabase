@@ -409,10 +409,10 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         currentQuery = ""
 
         if not filterQuery:
-            currentQuery = f'where begin_date  = "{begin_date}"'
+            currentQuery = f'where date = "{begin_date}"'
 
         else:
-            currentQuery = f' and begin_date = "{begin_date}"'
+            currentQuery = f' and date = "{begin_date}"'
         
         filterQuery += currentQuery 
     
@@ -513,7 +513,7 @@ def printRow(row) -> None:
     if row[5] != "None" and row[5]:
         eventString += f" recurs {row[5]}"
         if row[6] != "None" and row[6]:
-            eventString += f" until {row[7]}"
+            eventString += f" until {dateToString(row[7])}"
 
     if row[9] != "None" and row[9]:
         eventString += f" and is a {row[9]} type event"
@@ -566,3 +566,5 @@ def databaseToCsv() -> None:
 
     currentFile.close()
     connection.close()
+
+createTable()
