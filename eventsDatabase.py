@@ -508,23 +508,42 @@ def printRow(row) -> None:
     """
     if row[4] == "None" or not row[4]:
         return
-    eventString = f"""{row[1]} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
+    eventString = f"""{cs(row[1], "dodgerblue")} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
 
     if row[5] != "None" and row[5]:
-        eventString += f" recurs {row[5]}"
+        eventString += f" recurs {orderRecurrance(row[5])}"
         if row[6] != "None" and row[6]:
             eventString += f" until {dateToString(row[7])}"
 
     if row[9] != "None" and row[9]:
-        eventString += f" and is a {row[9]} type event"
+        eventString += f" and is a {cs(row[9], 'blue3')} type event"
 
     print(eventString)
 
-    
+def orderRecurrance(reccuranceString: str) -> str:
+    string = reccuranceString
+
+    if "/" in reccuranceString:
+        listForm = [None,None,None,None,None,None,None]
+
+        for day in reccuranceString.split("/"):
+            listForm[weekdays[day]] = day 
+
+        string = ""
+        for days in listForm:
+            if days:
+                if not string:
+                    string += days
+                else:
+                    string += "/" + days
+
+        
+
+    return cs(string, "red")
 
 def dateToString(date: str) -> str:
     date = date.split("-")
-    return f"{monthName[int(date[1])]} {dayPrefix[int(date[2])]} {date[0]}".strip()
+    return cs(f"{monthName[int(date[1])]} {dayPrefix[int(date[2])]} {date[0]}".strip(), "grey4")
 
 
 def timeToString(timeString: int) -> str:
@@ -541,7 +560,7 @@ def timeToString(timeString: int) -> str:
         hour = 12
     hour = abs(hour)
 
-    return f"{hour}:{timeString[2:]} {amOrPm}"
+    return cs(f"{hour}:{timeString[2:]} {amOrPm}", "yellow")
 
 def databaseToCsv() -> None:
     connection, cursor = connectToDb()
