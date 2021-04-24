@@ -50,7 +50,7 @@ def filterEvents(filterRange) -> None:
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-f","--filter", help="Type of filter: today, weekly, month or year", type=str)
-parser.add_argument("-q","--query", help="Write a sql query", nargs='+')
+parser.add_argument("-q","--query", help="Write a sql query", action="store_true")# nargs='+')
 parser.add_argument("--gui", help="run gui", action="store_true")
 
 args = parser.parse_args()
@@ -59,13 +59,14 @@ if args.filter:
     filterEvents(args.filter)
 
 if args.query:
-    query = ""
-    for word in args.query:
-        if word == "all":
-            word = "*"
-        query += word + " "
-
-    performQuery(query)
+    "limited fuctionality"
+    # query = ""
+    # for word in args.query:
+    #     if word == "all":
+    #         word = "*"
+    #     query += word + " "
+    query = input("Please input: \n")
+    performQuery(query,"*" if query.split()[1] == "*" else " ")#args.query[1] if args.query[1] != "all" else "*")
 
 if args.gui:
     os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py')

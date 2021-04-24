@@ -466,7 +466,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         filterQuery += currentQuery
     
     query += filterQuery
-    performQuery(query)
+    performQuery(query, "*")
 
 
 def printDatabase() -> None:
@@ -484,12 +484,20 @@ def printDatabase() -> None:
     connection.close()
 
 
-def performQuery(query) -> None:
+def performQuery(query, selectType) -> None:
     connection, cursor = connectToDb()
-    data = cursor.execute(query + "group by id ORDER BY date(date) ASC")
+    if selectType == "*":
+        query += " group by id ORDER BY date(date) ASC"
+    
+    data = cursor.execute(query)
+
+
 
     for row in data:
-        printRow(row)
+        if selectType == "*":
+            printRow(row)
+        else:
+            print(row)
     
     connection.close()
 
