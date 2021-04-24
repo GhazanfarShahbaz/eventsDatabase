@@ -488,16 +488,19 @@ def performQuery(query, selectType) -> None:
     connection, cursor = connectToDb()
     if selectType == "*":
         query += " group by id ORDER BY date(date) ASC"
-    
-    data = cursor.execute(query)
+    data = cursor.execute(query + " limit 1")
 
+    if not data.fetchone():
+        print("No results to print.")
+    else:
+        data = cursor.execute(query)
 
+        for row in data:
 
-    for row in data:
-        if selectType == "*":
-            printRow(row)
-        else:
-            print(row)
+            if selectType == "*":
+                printRow(row)
+            else:
+                print(row)
     
     connection.close()
 

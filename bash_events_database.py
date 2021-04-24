@@ -60,11 +60,7 @@ if args.filter:
 
 if args.query:
     "limited fuctionality"
-    # query = ""
-    # for word in args.query:
-    #     if word == "all":
-    #         word = "*"
-    #     query += word + " "
+
     query = input("Please input: \n")
     performQuery(query,"*" if query.split()[1] == "*" else " ")#args.query[1] if args.query[1] != "all" else "*")
 
