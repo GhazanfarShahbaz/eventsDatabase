@@ -5,6 +5,9 @@ import os
 
 
 def filterEvents(filterRange) -> None:
+    """
+    filter events function takes an option today, week, month or year and prints out events that match the query 
+    """
     acceptedArguments = {"today", "week", "month", "year"}
     if  filterRange.strip() in acceptedArguments:
         todaysDate = datetime.now()
@@ -16,6 +19,7 @@ def filterEvents(filterRange) -> None:
             firstDay  = todaysDate.day - currentDay
             firstMonth = todaysDate.month 
             firstYear = todaysDate.year 
+            # id first day is less than 0 then we have to roll over to the previous month
             if firstDay < 0:
                 daysInPreviousMonth = None 
                 if firstMonth == 1:
@@ -31,8 +35,9 @@ def filterEvents(filterRange) -> None:
 
             lastDay = (7-currentDay) + todaysDate.day 
             lastMonth = todaysDate.month 
-            lastYear =todaysDate.year
+            lastYear =todaysDate.year   
 
+            # if the last day is greter than the total days in the month then we have to move the date up and recalculate the date
             if lastDay > monthDays[lastMonth]:
                 lastDay = lastDay%monthDays[lastMonth] 
                 lastMonth += 1
@@ -62,9 +67,9 @@ if args.query:
     "limited fuctionality"
 
     query = input("Please input: \n")
-    performQuery(query,"*" if query.split()[1] == "*" else " ")#args.query[1] if args.query[1] != "all" else "*")
+    performQuery(query,"*" if query.split()[1] == "*" else " ")
 
 if args.gui:
-    os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py')
+    os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py') # runs the gui file
 
 
