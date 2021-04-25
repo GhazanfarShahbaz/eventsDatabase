@@ -4,7 +4,7 @@ from datetime import date, datetime
 import os 
 
 
-def filterEvents(filterRange) -> None:
+def filterEvents(filterRange, calculate) -> None:
     """
     filter events function takes an option today, week, month or year and prints out events that match the query 
     """
@@ -12,7 +12,7 @@ def filterEvents(filterRange) -> None:
     if  filterRange.strip() in acceptedArguments:
         todaysDate = datetime.now()
         if filterRange == "today":
-            filterDatabase(begin_date=f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}")
+            filterDatabase(begin_date=f"{todaysDate.month}/{todaysDate.day}/{todaysDate.year}",calculateFreeTime=calculate)
 
         elif filterRange == "week":
             currentDay = date.today().isoweekday()
@@ -44,13 +44,14 @@ def filterEvents(filterRange) -> None:
                 if lastMonth == 13:
                     lastYear += 1
                     
-            filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastYear}" )
+            filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastYear}",calculateFreeTime=calculate)
 
         elif filterRange == "month":
-            filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
+
+            filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}",calculateFreeTime=calculate)
 
         elif filterRange == "year":
-            filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.year + 1}" )
+            filterDatabase(begin_date=f"{1}/{1}/{todaysDate.year}", end_date_filter=f"{1}/{1}/{todaysDate.year + 1}",calculateFreeTime=calculate)
 
 parser = argparse.ArgumentParser()
 
@@ -61,10 +62,12 @@ parser.add_argument("-q","--query", help="Write a sql query", action="store_true
 #gui stores true or false
 parser.add_argument("--gui", help="run gui", action="store_true")
 
+parser.add_argument("--calculateFreeTime", "-cft", action="store_true")
+
 args = parser.parse_args()
 
 if args.filter:
-    filterEvents(args.filter)
+    filterEvents(args.filter, args.calculateFreeTime)
 
 if args.query:
     "limited fuctionality"

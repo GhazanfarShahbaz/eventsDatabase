@@ -402,10 +402,8 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
     return True
 
 
-def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", eventType = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0 ) -> None:
+def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last_recurrance = "", eventType = "", dateAdded = "", description = "", end_date_filter = "", end_time_filter = "", before_last_occurence=0, calculateFreeTime=False) -> None:
     #Add Event Type Filter
-    # connection, cursor = connectToDb()
-
     query = "Select * from Events "
     filterQuery = ""
     if eventName:
@@ -494,7 +492,10 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         filterQuery += currentQuery
     
     query += filterQuery
-    performQuery(query, "select")
+    if not calculateFreeTime:
+        performQuery(query, "select")
+    else:
+        performQuery(query, "calculate")
 
 
 def printDatabase() -> None:
@@ -522,7 +523,7 @@ def performQuery(query, selectType) -> None:
         if not data.fetchone():
             print("No results to print.")
         else:
-
+            print("Events")
             data = cursor.execute(query)
 
             for row in data:
@@ -531,6 +532,13 @@ def performQuery(query, selectType) -> None:
 
         # data = cursor.execute(query)
         # calculateFreeTime(data)
+    elif selectType == "calculate":
+        data = cursor.execute(query + " limit 1")
+
+        if not data.fetchone():
+            print("No results to print.")
+        else:
+            calculateFreeTime(cursor.execute(query))
     else:
         cursor.execute(query)
         connection.commit()
@@ -595,8 +603,7 @@ def databaseToCsv() -> None:
     connection, cursor = connectToDb()
     data = cursor.execute("Select * from Events")
 
-
-    currentFile = open("events.csv", "w")
+    currentFile = open("/Users/ghazshahbaz/documents/eventsdatabase/events.csv", "w")
 
     columnString = ""
     for t in data.description:
@@ -617,8 +624,10 @@ def databaseToCsv() -> None:
 
 
 def calculateFreeTime(data: list):
+    print("Events")
     timesTaken = {}
     for row in data:
+        printRow(row)
         if row[2] not in timesTaken.keys():
             if not (row[3] == row[4] and row[3] == 0): 
                 timesTaken[row[2]] = {
@@ -645,7 +654,7 @@ def calculateFreeTime(data: list):
                 timesTaken[row[2]]['times'].append({row[3]: row[4]})
             else:
                 timesTaken[row[2]]['times'].insert(lastIndex, {timeToAddStart: timeToAddEnd})
-
+    print("\nFree Times:")
     for date, times in timesTaken.items():
         previousTimes = 800 # wake time
         print(cs(date, 'grey4'), end = ": ")
@@ -653,14 +662,14 @@ def calculateFreeTime(data: list):
         for time in times['times']:
             for start, end in time.items():
                 if freeTimes:
-                    print(", ", end="")
+                    print(cs(", ", 'white'), end="")
                 print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
                 previousTimes = end
                 freeTimes = True
 
         if previousTimes < 2200: #2200 is sleep time :)
             if freeTimes:
-                print(", ", end="")
+                print(cs(", ", 'white'), end="")
             print(cs(f"{timeToString(previousTimes)} to {timeToString(2200)}", 'yellow'))
             freeTimes = True 
 
