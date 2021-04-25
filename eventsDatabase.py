@@ -11,11 +11,13 @@ from stringcolor import cs
 
 
     Next Implementation:
-        Implement bash commands 
+        Implement bash commands - done
         
         Calculate free time
 
-        Change how row is printed
+        Account for leap years
+
+        Change how row is printed - done
 """
 
 
@@ -598,3 +600,11 @@ def databaseToCsv() -> None:
     connection.close()
 
 createTable()
+
+def chechIfLeapYear(year) -> bool:
+    """
+        year: int 
+        returns true if a year is a leap year false if not 
+    """
+    # a number is a leap year if it is divisible by 4 of divisible by 100 and 400
+    return (year%4 == 0 and (year%100 > 0 or (year%100 == 0 and year%400 == 0)))
