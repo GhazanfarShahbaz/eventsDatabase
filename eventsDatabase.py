@@ -371,17 +371,24 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                             "{description if description else None}"
                             )
                     ''')
-                
-                if currentDay + 1 <= monthDays[currentMonth]:
-                    currentDay += 1
-                elif currentDay + 1 > monthDays[currentMonth]:
-                    if currentMonth < 12:
+
+                if currentMonth != 2 or not chechIfLeapYear(currentYear):
+                    if currentDay + 1 <= monthDays[currentMonth]:
+                        currentDay += 1
+                    elif currentDay + 1 > monthDays[currentMonth]:
+                        if currentMonth < 12:
+                            currentMonth += 1
+                            currentDay = 1
+                        else:
+                            currentMonth = 1
+                            currentDay = 1
+                            currentYear += 1
+                else:
+                    if currentDay + 1 <= 29:
+                        currentDay += 1
+                    else:
                         currentMonth += 1
                         currentDay = 1
-                    else:
-                        currentMonth = 1
-                        currentDay = 1
-                        currentYear += 1
                 
                 currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
 
