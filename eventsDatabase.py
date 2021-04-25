@@ -15,7 +15,7 @@ from stringcolor import cs
         
         Calculate free time
 
-        Account for leap years
+        Account for leap years - done
 
         Change how row is printed - done
 """
@@ -95,7 +95,7 @@ weekdays = {
     "th": 4, 
     "f": 5, 
     "sat": 6, 
-    "sun": 1
+    "sun": 0
 }
 
 vowels = {'a', 'e', 'i', 'o', 'u'}
@@ -494,7 +494,7 @@ def filterDatabase(eventName = "", begin_date = "", time = -1, recurs = "", last
         filterQuery += currentQuery
     
     query += filterQuery
-    performQuery(query, "*")
+    performQuery(query, "select")
 
 
 def printDatabase() -> None:
@@ -514,43 +514,33 @@ def printDatabase() -> None:
 
 def performQuery(query, selectType) -> None:
     connection, cursor = connectToDb()
-    if selectType == "*":
-        query += " group by id ORDER BY date(date) ASC"
-    data = cursor.execute(query + " limit 1")
+    if selectType == "select":
+        query += " group by id ORDER BY date(date) ASC, time ASC"
 
-    if not data.fetchone():
-        print("No results to print.")
-    else:
-        data = cursor.execute(query)
+        data = cursor.execute(query + " limit 1")
 
-        for row in data:
+        if not data.fetchone():
+            print("No results to print.")
+        else:
 
-            if selectType == "*":
+            data = cursor.execute(query)
+
+            for row in data:
                 printRow(row)
-            else:
-                print(row)
-    
+        print()
+        
+        # data = cursor.execute(query)
+        # calculateFreeTime(data)
+    else:
+        cursor.execute(query)
+        connection.commit()
     connection.close()
 
 
 def printRow(row) -> None:
-    """
-    Rows[0] = id
-    Rows[1] = event name
-    Rows[2] = start date 
-    Rows[3] = time 
-    Rows[4] = end time 
-    Rows[5] = recurs 
-    Rows[6] = start recurrance 
-    Rows[7] = last recurrance 
-    Rows[8] = date added 
-    Rows[9] = type of event
-    Rows[10] = description
-    """
     if row[4] == "None" or not row[4]:
         return
     eventString = f"""{cs(row[1], "dodgerblue")} {dateToString(row[2])} at {timeToString(row[3])} - {timeToString(row[4])}"""
-
     if row[5] != "None" and row[5]:
         eventString += f" recurs {orderRecurrance(row[5])}"
         if row[6] != "None" and row[6]:
@@ -625,4 +615,60 @@ def databaseToCsv() -> None:
     currentFile.close()
     connection.close()
 
-createTable()
+
+def calculateFreeTime(data: list):
+    timesTaken = {}
+    for row in data:
+        # print(row)
+        if row[2] not in timesTaken.keys():
+            if not (row[3] == row[4] and row[3] == 0): 
+                timesTaken[row[2]] = {
+                    "times" : [{row[3]: row[4]}],
+                }
+        else:
+            timeToAddStart = row[3]
+            timeToAddEnd = row[4]
+            indexesToRemove = set()
+            for i, times in enumerate(timesTaken[row[2]]['times']):
+                for start, end in times.items():
+                    if (start <= timeToAddStart and timeToAddStart <= end) or (start <= timeToAddEnd and timeToAddEnd <= end):
+                        indexesToRemove.add(i)
+                        timeToAddStart = min(start, timeToAddStart)
+                        timeToAddEnd = max(end, timeToAddEnd)
+                        
+            lastIndex = -1
+            while indexesToRemove:
+                current = indexesToRemove.pop()
+                timesTaken[row[2]]['times'].pop(current)
+                lastIndex = current
+
+            if lastIndex == -1:
+                timesTaken[row[2]]['times'].append({row[3]: row[4]})
+            else:
+                timesTaken[row[2]]['times'].insert(lastIndex, {timeToAddStart: timeToAddEnd})
+
+    for date, times in timesTaken.items():
+        previousTimes = 800 # wake time
+        print(cs(date, 'grey4'), end = ": ")
+        freeTimes = False
+        for time in times['times']:
+            for start, end in time.items():
+                if freeTimes:
+                    print(", ", end="")
+                print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
+                previousTimes = end
+                freeTimes = True
+
+        if previousTimes < 2200: #2200 is sleep time :)
+            if freeTimes:
+                print(", ", end="")
+            print(cs(f"{timeToString(previousTimes)} to {timeToString(2359)}", 'yellow'))
+            freeTimes = True 
+
+        if not freeTimes:
+            print(cs("No free times on this day", "red"))
+
+
+
+    
+        

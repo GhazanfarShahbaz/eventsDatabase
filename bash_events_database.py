@@ -19,7 +19,7 @@ def filterEvents(filterRange) -> None:
             firstDay  = todaysDate.day - currentDay
             firstMonth = todaysDate.month 
             firstYear = todaysDate.year 
-            # id first day is less than 0 then we have to roll over to the previous month
+            # if the first day is less than 0 then we have to roll over to the previous month
             if firstDay < 0:
                 daysInPreviousMonth = None 
                 if firstMonth == 1:
@@ -44,7 +44,7 @@ def filterEvents(filterRange) -> None:
                 if lastMonth == 13:
                     lastYear += 1
                     
-            filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastMonth}" )
+            filterDatabase(begin_date=f"{firstMonth}/{firstDay}/{firstYear}", end_date_filter=f"{lastMonth}/{lastDay}/{lastYear}" )
 
         elif filterRange == "month":
             filterDatabase(begin_date=f"{todaysDate.month}/{1}/{todaysDate.year}", end_date_filter=f"{todaysDate.month}/{monthDays[todaysDate.month]}/{todaysDate.year}" )
@@ -70,7 +70,7 @@ if args.query:
     "limited fuctionality"
 
     query = input("Please input: \n")
-    performQuery(query,"*" if query.split()[1] == "*" else " ")
+    performQuery(query, query.split()[0])
 
 if args.gui:
     os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py') # runs the gui file
