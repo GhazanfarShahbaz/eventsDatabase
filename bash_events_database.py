@@ -78,4 +78,6 @@ if args.query:
 if args.gui:
     os.system('python3 /Users/ghazshahbaz/documents/eventsdatabase/events_gui.py') # runs the gui file
 
+if args.calculateFreeTime and not args.query:
+    filterDatabase(begin_date=input("Input the first date(format month/day/year): "), end_date_filter=input("Input the secind date(format month/day/year): "),calculateFreeTime=True)
 

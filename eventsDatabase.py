@@ -516,14 +516,13 @@ def printDatabase() -> None:
 def performQuery(query, selectType) -> None:
     connection, cursor = connectToDb()
     if selectType == "select":
-        query += " group by id ORDER BY date(date) ASC, time ASC"
-
         data = cursor.execute(query + " limit 1")
 
         if not data.fetchone():
             print("No results to print.")
         else:
             print("Events")
+            query += " group by id ORDER BY date(date) ASC, time ASC"
             data = cursor.execute(query)
 
             for row in data:
@@ -538,6 +537,7 @@ def performQuery(query, selectType) -> None:
         if not data.fetchone():
             print("No results to print.")
         else:
+            query += " group by id ORDER BY date(date) ASC, time ASC"
             calculateFreeTime(cursor.execute(query))
     else:
         cursor.execute(query)
@@ -624,6 +624,8 @@ def databaseToCsv() -> None:
 
 
 def calculateFreeTime(data: list):
+
+    # Need to combine dates for same free times
     print("Events")
     timesTaken = {}
     for row in data:
@@ -675,6 +677,8 @@ def calculateFreeTime(data: list):
 
         if not freeTimes:
             print(cs("No free times on this day", "red"))
+
+    print("Note: Dates not included are full for the whole day")
 
 
 
