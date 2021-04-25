@@ -528,7 +528,7 @@ def performQuery(query, selectType) -> None:
             for row in data:
                 printRow(row)
         print()
-        
+
         # data = cursor.execute(query)
         # calculateFreeTime(data)
     else:
@@ -619,7 +619,6 @@ def databaseToCsv() -> None:
 def calculateFreeTime(data: list):
     timesTaken = {}
     for row in data:
-        # print(row)
         if row[2] not in timesTaken.keys():
             if not (row[3] == row[4] and row[3] == 0): 
                 timesTaken[row[2]] = {
@@ -662,7 +661,7 @@ def calculateFreeTime(data: list):
         if previousTimes < 2200: #2200 is sleep time :)
             if freeTimes:
                 print(", ", end="")
-            print(cs(f"{timeToString(previousTimes)} to {timeToString(2359)}", 'yellow'))
+            print(cs(f"{timeToString(previousTimes)} to {timeToString(2200)}", 'yellow'))
             freeTimes = True 
 
         if not freeTimes:
