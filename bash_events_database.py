@@ -54,8 +54,11 @@ def filterEvents(filterRange) -> None:
 
 parser = argparse.ArgumentParser()
 
+#filter takes in a string
 parser.add_argument("-f","--filter", help="Type of filter: today, weekly, month or year", type=str)
-parser.add_argument("-q","--query", help="Write a sql query", action="store_true")# nargs='+')
+#query stores true or false
+parser.add_argument("-q","--query", help="Write a sql query", action="store_true")
+#gui stores true or false
 parser.add_argument("--gui", help="run gui", action="store_true")
 
 args = parser.parse_args()
