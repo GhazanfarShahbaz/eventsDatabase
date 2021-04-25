@@ -160,6 +160,14 @@ def extendTime(time: str) -> str:
     date = "0"*(4-len(time)) + time
     return date
 
+def chechIfLeapYear(year) -> bool:
+    """
+        year: int 
+        returns true if a year is a leap year false if not 
+    """
+    # a number is a leap year if it is divisible by 4 of divisible by 100 and 400
+    return (year%4 == 0 and (year%100 > 0 or (year%100 == 0 and year%400 == 0)))
+
 
 def addToTable(eventName, date, time = None, end_time = None, recurs = None, last_recurrance = None, type_of_event = None, description = None, start_recurrance = None) -> bool:
     time = extendTime(time)
@@ -229,16 +237,24 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                             "{description if description else None}"
                             )
                     ''')
-                if currentDay + 1 <= monthDays[currentMonth]:
-                    currentDay += 1
-                elif currentDay + 1 > monthDays[currentMonth]:
-                    if currentMonth < 12:
+                if currentMonth != 2 or (not chechIfLeapYear(currentYear)):
+                    if currentDay + 1 <= monthDays[currentMonth]:
+                        currentDay += 1
+                    elif currentDay + 1 > monthDays[currentMonth]:
+                        if currentMonth < 12:
+                            currentMonth += 1
+                            currentDay = 1
+                        else:
+                            currentMonth = 1
+                            currentDay = 1
+                            currentYear += 1
+                else:
+                    if currentDay + 1 <= 29:
+                        currentDay += 1
+                    else:
                         currentMonth += 1
                         currentDay = 1
-                    else:
-                        currentMonth = 1
-                        currentDay = 1
-                        currentYear += 1
+                    
                 
                 currentDate = extendAndFormatDate(f"{currentMonth}/{currentDay}/{currentYear}")
         
@@ -263,7 +279,10 @@ def addToTable(eventName, date, time = None, end_time = None, recurs = None, las
                 ''')
                 currentDay += 7
                 if currentDay > monthDays[currentMonth]:
-                    currentDay %= monthDays[currentMonth]
+                    if currentMonth != 2 or (not chechIfLeapYear(currentYear)):
+                        currentDay %= monthDays[currentMonth] 
+                    else:
+                        currentDay %= 29
                     if currentMonth < 12:
                         currentMonth += 1
                     else:
@@ -600,11 +619,3 @@ def databaseToCsv() -> None:
     connection.close()
 
 createTable()
-
-def chechIfLeapYear(year) -> bool:
-    """
-        year: int 
-        returns true if a year is a leap year false if not 
-    """
-    # a number is a leap year if it is divisible by 4 of divisible by 100 and 400
-    return (year%4 == 0 and (year%100 > 0 or (year%100 == 0 and year%400 == 0)))
