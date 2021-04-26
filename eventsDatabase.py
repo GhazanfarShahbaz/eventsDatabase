@@ -663,7 +663,7 @@ def calculateFreeTime(data: list):
     
     for date, times in timesTaken.items():
         previousTimes = 800 # wake time
-        print(cs(dateToString(date), 'grey4'), end = ": ")
+        print(dateToString(date), end = ": ")
         freeTimes = False
         length = len(times['times'])
         current = 0
@@ -679,7 +679,6 @@ def calculateFreeTime(data: list):
                 print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
                 previousTimes = end
             current += 1
-
 
         if previousTimes < 2200: #2200 is sleep time :)
             if current > 0:
