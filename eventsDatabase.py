@@ -665,21 +665,28 @@ def calculateFreeTime(data: list):
         previousTimes = 800 # wake time
         print(cs(dateToString(date), 'grey4'), end = ": ")
         freeTimes = False
+        length = len(times['times']) -1
+        current = 0
         for time in times['times']:
             for start, end in time.items():
-                if freeTimes:
+                if current == 0 and start < previousTimes:
+                    previousTimes = start
+                elif current > 0:
                     print(cs(", ", 'white'), end="")
+                    if current == length and end >= 2200:
+                        print("and ", end="")
+
                 print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
                 previousTimes = end
-                freeTimes = True
+            current += 1
+
 
         if previousTimes < 2200: #2200 is sleep time :)
-            if freeTimes:
-                print(cs(", ", 'white'), end="")
+            if current > 0:
+                print(cs(", and ", 'white'), end="")
             print(cs(f"{timeToString(previousTimes)} to {timeToString(2200)}", 'yellow'))
-            freeTimes = True 
 
-        if not freeTimes:
+        if current == 0:
             print(cs("No free times on this day", "red"))
 
     print("Note: Dates not included are free for the whole day")
