@@ -664,7 +664,6 @@ def calculateFreeTime(data: list):
     for date, times in timesTaken.items():
         previousTimes = 800 # wake time
         print(dateToString(date), end = ": ")
-        freeTimes = False
         length = len(times['times'])
         current = 0
         for time in times['times']:
