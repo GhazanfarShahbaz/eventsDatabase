@@ -645,6 +645,8 @@ def calculateFreeTime(data: list):
                         indexesToRemove.add(i)
                         timeToAddStart = min(start, timeToAddStart)
                         timeToAddEnd = max(end, timeToAddEnd)
+                    elif timeToAddEnd < start: # data is sorted no need to continue if the end is less than the start time
+                        break
                         
             lastIndex = -1
             while indexesToRemove:
