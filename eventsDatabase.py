@@ -689,7 +689,7 @@ def calculateFreeTime(data: list):
         if current == 0:
             print(cs("No free times on this day", "red"))
 
-    print("Note: Dates not included are free for the whole day")
+    print("\nNote: Dates not included are free for the whole day")
 
 
 
