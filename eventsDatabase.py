@@ -527,10 +527,9 @@ def performQuery(query, selectType) -> None:
 
             for row in data:
                 printRow(row)
+
         print()
 
-        # data = cursor.execute(query)
-        # calculateFreeTime(data)
     elif selectType == "calculate":
         data = cursor.execute(query + " limit 1")
 
@@ -627,6 +626,7 @@ def calculateFreeTime(data: list):
 
     # Need to combine dates for same free times
     print("Events")
+    
     timesTaken = {}
     for row in data:
         printRow(row)
@@ -656,10 +656,12 @@ def calculateFreeTime(data: list):
                 timesTaken[row[2]]['times'].append({row[3]: row[4]})
             else:
                 timesTaken[row[2]]['times'].insert(lastIndex, {timeToAddStart: timeToAddEnd})
+
     print("\nFree Times:")
+    
     for date, times in timesTaken.items():
         previousTimes = 800 # wake time
-        print(cs(date, 'grey4'), end = ": ")
+        print(cs(dateToString(date), 'grey4'), end = ": ")
         freeTimes = False
         for time in times['times']:
             for start, end in time.items():
@@ -678,7 +680,7 @@ def calculateFreeTime(data: list):
         if not freeTimes:
             print(cs("No free times on this day", "red"))
 
-    print("Note: Dates not included are full for the whole day")
+    print("Note: Dates not included are free for the whole day")
 
 
 
