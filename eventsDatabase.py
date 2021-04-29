@@ -2,25 +2,6 @@ from os import times
 import sqlite3 as sql 
 from datetime import datetime
 from stringcolor import cs 
-import time as t
-
-"""
-    Notes 
-    Sqlite accepts dates in the format YYYY-MM-DD 
-    turn date mm/dd/yyyy -> YYYY-MM-DD 
-    Query -> WHERE DATE(date) BETWEEN 'some date' AND 'another date'
-
-
-    Next Implementation:
-        Implement bash commands - done
-        
-        Calculate free time
-
-        Account for leap years - done
-
-        Change how row is printed - done
-"""
-
 
 monthDays = {
    1: 31, 
@@ -650,7 +631,8 @@ def calculateFreeTime(data: list) -> None:
             addTimeStart = row[3]
             addTimeEnd = row[4]
 
-            previous = timesTaken[row[2]][-1]
+            #data is ordered only need to check previous entry for collision
+            previous = timesTaken[row[2]][-1] 
             if not previous[1] < addTimeStart and not previous[0] > addTimeEnd:
                 timesTaken[row[2]][-1] = [min(previous[0], addTimeStart), max(previous[1], addTimeEnd)]
             else:
