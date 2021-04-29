@@ -649,25 +649,12 @@ def calculateFreeTime(data: list) -> None:
         else:
             addTimeStart = row[3]
             addTimeEnd = row[4]
-            intervals = []
-            added = False
-            for start, end  in timesTaken[row[2]]:
 
-                if end < addTimeStart:
-                    intervals.append([start, end])
-                elif start > addTimeEnd:
-                    if not added:
-                        intervals.append([addTimeStart, addTimeEnd])
-                        added = True 
-                    intervals.append([start, end])
-                else:
-                    addTimeStart = min(start, addTimeStart)
-                    addTimeEnd = max(end, addTimeEnd)
-
-            if not added:
-                intervals.append([addTimeStart, addTimeEnd])
-
-            timesTaken[row[2]] = intervals
+            previous = timesTaken[row[2]][-1]
+            if not previous[1] < addTimeStart and not previous[0] > addTimeEnd:
+                timesTaken[row[2]][-1] = [min(previous[0], addTimeStart), max(previous[1], addTimeEnd)]
+            else:
+                timesTaken[row[2]].append([addTimeStart, addTimeEnd])
 
     print("\nFree Times")
     for date, times in timesTaken.items():
@@ -675,7 +662,6 @@ def calculateFreeTime(data: list) -> None:
         print(dateToString(date), end = ": ")
         length = len(times)
         current = 0
-
         for start, end in times:
             if current == 0 and start < previousTimes:
                 previousTimes = start 
@@ -687,8 +673,6 @@ def calculateFreeTime(data: list) -> None:
             print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
             previousTimes = end
             current += 1
-
-        
 
         if previousTimes < 2200: #2200 is sleep time :)
             if current > 0:
