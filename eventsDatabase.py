@@ -2,6 +2,7 @@ from os import times
 import sqlite3 as sql 
 from datetime import datetime
 from stringcolor import cs 
+import time as t
 
 """
     Notes 
@@ -545,8 +546,8 @@ def performQuery(query, selectType) -> None:
 
         if not data.fetchone():
             print("No results to print.")
-        else:
-            query += " group by id ORDER BY date(date) ASC, time ASC"
+        else: 
+            query += " ORDER BY date(date) ASC, time ASC" # using distinct will exclude dates
             calculateFreeTime(cursor.execute(query))
     else:
         cursor.execute(query)
@@ -632,62 +633,62 @@ def databaseToCsv() -> None:
     connection.close()
 
 
-def calculateFreeTime(data: list):
-
-    # Need to combine dates for same free times
+def calculateFreeTime(data: list) -> None:
     print("Events")
-    
+
     timesTaken = {}
+    eventsSeen = set()
     for row in data:
-        printRow(row)
+        if row[2] not in eventsSeen:
+            printRow(row)
+            eventsSeen.add(row[2])
+
         if row[2] not in timesTaken.keys():
-            if not (row[3] == row[4] and row[3] == 0): 
-                timesTaken[row[2]] = {
-                    "times" : [{row[3]: row[4]}],
-                }
+            if not (row[3] == row[4] and row[3] == 0): # this would be the default insert where time is 0000
+                timesTaken[row[2]] = [[row[3], row[4]]]
         else:
-            timeToAddStart = row[3]
-            timeToAddEnd = row[4]
-            indexesToRemove = set()
-            for i, times in enumerate(timesTaken[row[2]]['times']):
-                for start, end in times.items():
-                    if (start <= timeToAddStart and timeToAddStart <= end) or (start <= timeToAddEnd and timeToAddEnd <= end) or (start >= timeToAddStart and end >= start):
-                        indexesToRemove.add(i)
-                        timeToAddStart = min(start, timeToAddStart)
-                        timeToAddEnd = max(end, timeToAddEnd)
-                    elif timeToAddEnd < start: # data is sorted no need to continue if the end is less than the start time
-                        break
-                        
-            lastIndex = -1
-            while indexesToRemove:
-                current = indexesToRemove.pop()
-                timesTaken[row[2]]['times'].pop(current)
-                lastIndex = current
+            addTimeStart = row[3]
+            addTimeEnd = row[4]
+            intervals = []
+            added = False
+            for start, end  in timesTaken[row[2]]:
 
-            if lastIndex == -1:
-                timesTaken[row[2]]['times'].append({row[3]: row[4]})
-            else:
-                timesTaken[row[2]]['times'].insert(lastIndex, {timeToAddStart: timeToAddEnd})
+                if end < addTimeStart:
+                    intervals.append([start, end])
+                elif start > addTimeEnd:
+                    if not added:
+                        intervals.append([addTimeStart, addTimeEnd])
+                        added = True 
+                    intervals.append([start, end])
+                else:
+                    addTimeStart = min(start, addTimeStart)
+                    addTimeEnd = max(end, addTimeEnd)
 
-    print("\nFree Times:")
-    
+            if not added:
+                intervals.append([addTimeStart, addTimeEnd])
+
+            timesTaken[row[2]] = intervals
+
+    print("\nFree Times")
     for date, times in timesTaken.items():
-        previousTimes = 800 # wake time
+        previousTimes = 800
         print(dateToString(date), end = ": ")
-        length = len(times['times'])
+        length = len(times)
         current = 0
-        for time in times['times']:
-            for start, end in time.items():
-                if current == 0 and start < previousTimes:
-                    previousTimes = start
-                elif current > 0:
-                    print(cs(", ", 'white'), end="")
-                    if current == length - 1 and end >= 2200:
-                        print("and ", end="")
 
-                print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
-                previousTimes = end
+        for start, end in times:
+            if current == 0 and start < previousTimes:
+                previousTimes = start 
+            elif current > 0:
+                print(cs(", ", 'white'), end="")
+                if current == length - 1 and end >= 2200:
+                    print("and ", end="")
+                
+            print(cs(f"{timeToString(previousTimes)} to {timeToString(start)}", 'yellow'), end="")
+            previousTimes = end
             current += 1
+
+        
 
         if previousTimes < 2200: #2200 is sleep time :)
             if current > 0:
@@ -698,7 +699,7 @@ def calculateFreeTime(data: list):
             print(cs("No free times on this day", "red"))
 
     print(cs("Note: Dates not included are either free or full for the whole day\n", "red").bold())
-
+                    
 
 
     
