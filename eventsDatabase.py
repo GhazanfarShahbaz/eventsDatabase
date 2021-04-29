@@ -517,7 +517,14 @@ def performQuery(query, selectType) -> None:
     connection, cursor = connectToDb()
     if selectType == "select":
         data = cursor.execute(query + " limit 1")
+        filterType = None
+        try:
+            filterType = query.split()[1] 
+        except:
+            print("Error")
+            return
 
+        printFull = True if filterType.strip() == "*" else False
         if not data.fetchone():
             print("No results to print.")
         else:
@@ -526,7 +533,10 @@ def performQuery(query, selectType) -> None:
             data = cursor.execute(query)
 
             for row in data:
-                printRow(row)
+                if printFull:
+                    printRow(row)
+                else:
+                    print(row)
 
         print()
 
@@ -641,7 +651,7 @@ def calculateFreeTime(data: list):
             indexesToRemove = set()
             for i, times in enumerate(timesTaken[row[2]]['times']):
                 for start, end in times.items():
-                    if (start <= timeToAddStart and timeToAddStart <= end) or (start <= timeToAddEnd and timeToAddEnd <= end):
+                    if (start <= timeToAddStart and timeToAddStart <= end) or (start <= timeToAddEnd and timeToAddEnd <= end) or (start >= timeToAddStart and end >= start):
                         indexesToRemove.add(i)
                         timeToAddStart = min(start, timeToAddStart)
                         timeToAddEnd = max(end, timeToAddEnd)
@@ -687,7 +697,7 @@ def calculateFreeTime(data: list):
         if length  == 0:
             print(cs("No free times on this day", "red"))
 
-    print(cs("Note: Dates not included are free for the whole day\n", "red").bold())
+    print(cs("Note: Dates not included are either free or full for the whole day\n", "red").bold())
 
 
 
