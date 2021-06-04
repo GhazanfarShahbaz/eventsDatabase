@@ -83,7 +83,7 @@ weekdays = {
 vowels = {'a', 'e', 'i', 'o', 'u'}
 
 def connectToDb() -> tuple:
-    connection = sql.connect("/Users/ghazshahbaz/documents/eventsdatabase/events.db")       # sql.Connection
+    connection = sql.connect("/Users/ghazshahbaz/documents/tools/eventsdatabase/events.db")       # sql.Connection
     cursor = connection.cursor()                # sql.Cursor
     return connection, cursor   
 
@@ -615,6 +615,7 @@ def databaseToCsv() -> None:
 
 
 def calculateFreeTime(data: list) -> None:
+    # can be improved by checking if specific events have been seen together before so that appending wont be needed
     print("Events")
 
     timesTaken = {}
